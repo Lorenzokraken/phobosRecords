@@ -1,0 +1,45 @@
+Task,Ended,Stack,Diff,CATEGORY,Priority,Effort (h),Started,Files,Completion,Notes
+TIER 1: PRODUCTION FUNDAMENTALS (✅ COMPLETATO)
+Creare transaction.csv,✅,py,Medium,Must,🟢,2,✅2102,transactions.csv,100%,Formato reale da piattaforme
+Creare works.json,✅,py,Low,Must,🟢,1,✅2102,works.json,100%,Arricchito con quotas
+Creare artists.json,✅,py,Low,Must,🟢,1,✅2102,artists.json,100%,Dati realisti completi
+Aggiornare schema DB - artists,✅,py,High,Must,🟢,2,✅2102,db.py,100%,artist_image+work_type+iswc+genre
+Aggiornare schema DB - works,✅,py,High,Must,🟢,2,✅2102,db.py,100%,secondary_artists+work_cover+genre+bpm+iswc+key
+Aggiornare schema DB - transactions,✅,py,High,Must,🟢,2,✅2102,db.py,100%,is_artist_paid+purchase_month+platform+territory
+Creare tabella quotas,✅,py,High,Must,🟢,2,✅2102,db.py,100%,Split multi-artista
+Docker Compose setup,✅,DevOps,Low,Must,🟢,1,✅2312,docker-compose.yml,100%,PostgreSQL 15 container
+Setup Pytest,✅,py,Medium,Must,🟢,2,✅2312,tests/conftest.py+test_etl.py+test_queries.py,100%,13 test passing
+Aggiornare ETL input,✅,py,High,Must,🟢,4,✅2312,etl_in.py,100%,Supporto JSON+CSV
+Aggiornare ETL output - advance,✅,py,High,Must,🟢,3,✅2312,etl_out.py,100%,Lordo-Netto-Advance
+Aggiornare ETL output - split,✅,py,High,Must,🟢,3,✅2312,etl_out.py,100%,Usare tabella quotas
+Logging ETL (@log_operation),✅,py,Low,Must,🟢,1,✅2312,etl/logger.py,100%,Decorator pattern
+Error handling ETL,✅,py,Medium,Must,🟢,2,✅2312,etl/db_operations.py,100%,Centralizzato in @log_operation
+Data enrichment + validation,✅,py,Medium,Must,🟢,2,✅2312,data/*.json+transaction.csv,100%,Quotas 100% verificate in Polars
+README.md,IN PROGRESS,md,Low,Must,🟡,1,✅2312,README.md,10%,Documentazione GitHub
+requirements.txt,IN PROGRESS,py,Low,Must,🟢,0.5,✅2312,requirements.txt,10%,Dipendenze Python
+TIER 2: ADVANCED FEATURES (IN PROGRESS)
+Setup API FastAPI,,py,High,Must,🟢,3,,api.py,0%,requirements.txt+base
+API: /calculate_artist_revenue,,py,Medium,Must,🟢,2,,api.py,0%,Revenue totale artista
+API: /calculate_artist_monthly_revenue,,py,Medium,Must,🟡,2,,api.py,0%,Revenue mensile artista
+API: /calculate_work_revenue,,py,Medium,Must,🟡,2,,api.py,0%,Revenue per opera
+API: /get_top_artist,,py,Low,Must,🟡,1,,api.py,0%,Artisti top
+API: /tot_revenue,,py,Low,Must,🟢,1,,api.py,0%,Revenue totale
+API: /tot_unit_sold,,py,Low,Must,🟡,1,,api.py,0%,Unità vendute
+API: /get_works,,py,Low,Must,🟢,1,,api.py,0%,Lista opere
+API: /get_artist,,py,Low,Must,🟢,1,,api.py,0%,Lista artisti
+API: /create_work,,py,Medium,Must,🟡,2,,api.py,0%,Crea opera
+API: /create_artist,,py,Medium,Must,🟡,2,,api.py,0%,Crea artista
+Logging API,,py,Low,Must,🟡,1,,api.py,0%,File: api.log
+Test API endpoint,,py,Medium,Must,🟢,2,,test.py,0%,Test tutte le API
+CI/CD Pipeline,,DevOps,High,Must,🔴,4,,GitHub Actions,0%,Push to prod
+NICE TO HAVE (Future)
+Immagini reali,,,Low,Nice,🟡,1,,frontend/,0%,Sostituire placeholder
+Pagination dinamica,,js,Medium,Nice,🟡,3,,artist.html+works.html,0%,Fetch da API
+Form artisti con API,,js,High,Nice,🟡,4,,artist.html,0%,Submit a /create_artist
+Form opere con API,,js,High,Nice,🟡,4,,works.html,0%,Submit a /create_work
+Dashboard con API,,js,Medium,Nice,🟡,4,,index.html,0%,Metriche reali
+Login utenti,,py,High,Nice,🔴,8,,auth.py,0%,Cofounder+manager
+OUT OF SCOPE
+Dashboard con grafici,,js,High,Out,🔴,12,,frontend/,0%,Chart.js
+Export PDF/Excel,,py,Medium,Out,🔴,6,,reports.py,0%,pandas/openpyxl
+Notifiche email,,py,High,Out,🔴,8,,notifications.py,0%,SMTP/SendGrid

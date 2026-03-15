@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artists - Phobos Records</title>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="/assets/shared.css">
+    <style>
+        .artists-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .artist-card {
+            background-color: #181818;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #282828;
+        }
+
+        .artist-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        .artist-image {
+            margin-bottom: 16px;
+        }
+
+        .artist-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #333;
+        }
+
+        .artist-info h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: #ffffff;
+        }
+
+        .artist-genre {
+            color: #b3b3b3;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .artist-stats {
+            color: #ffffff;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .artist-description {
+            color: #b3b3b3;
+            font-size: 14px;
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <header class="top-bar">
+        <div class="logo-section">
+            <img src="/assets/phobos_logo.png" alt="Phobos Records Logo" class="logo">
+            <div class="brand-name">Phobos Records</div>
+        </div>
+        <nav>
+            <ul class="nav-menu">
+                <li><a href="/">Home</a></li>
+                <li><a href="/artists" class="active">Artists</a></li>
+                <li><a href="/works">Works</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main class="main">
+        <div class="page-header">
+            <h1 class="page-title">Our Artists</h1>
+            <button id="toggleFormBtn" class="toggle-form-btn">Add Artist</button>
+        </div>
+
+        <div class="artists-grid" id="artistsGrid">
+                <!-- Artists loaded dynamically from API -->
+        </div>
+
+        <template id="artistCardTemplate">
+            <div class="artist-card">
+                <div class="artist-image">
+                    <img src="" alt="" class="artist-avatar">
+                </div>
+                <div class="artist-info">
+                    <h3 class="artist-name"></h3>
+                    <p class="artist-genre"></p>
+                    <p class="artist-stats"></p>
+                    <p class="artist-description"></p>
+                </div>
+            </div>
+        </template>
+
+        <div class="pagination">
+            <button class="pagination-btn active">1</button>
+            <button class="pagination-btn">2</button>
+            <button class="pagination-btn">3</button>
+            <button class="pagination-btn next">Next →</button>
+        </div>
+    </main>
+    
+    <!-- Modal Dialog -->
+    <div id="artistModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="form-title">Add New Artist</h2>
+                <button id="closeModal" class="close-btn">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="artistForm">
+                    <div class="form-group">
+                        <label for="artistName">Artist Name *</label>
+                        <input type="text" id="artistName" name="artistName" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="royaltyPct">Royalty Percentage (%) *</label>
+                            <input type="number" id="royaltyPct" name="royaltyPct" min="0" max="100" step="0.01" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="advancedPaid">Advanced Paid ($)</label>
+                            <input type="number" id="advancedPaid" name="advancedPaid" min="0" step="0.01">
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="submit-btn">Add Artist</button>
+                        <button type="button" id="cancelFormBtn" class="reset-btn">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/assets/shared.js"></script>
+    <script>
+        // Generate random color
+        function getRandomColor() {
+            const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        // Load artists from API
+        async function loadArtists() {
+            try {
+                const response = await fetch('/api/artists');
+                const data = await response.json();
+                const grid = document.getElementById('artistsGrid');
+                const template = document.getElementById('artistCardTemplate');
+
+                grid.innerHTML = ''; // Clear existing
+
+                data.artists.forEach((artist, index) => {
+                    const clone = template.content.cloneNode(true);
+                    const card = clone.querySelector('.artist-card');
+                    const img = clone.querySelector('img');
+
+                    clone.querySelector('.artist-name').textContent = artist.artist_name;
+                    clone.querySelector('.artist-genre').textContent = artist.main_genre;
+                    clone.querySelector('.artist-stats').textContent = `Royalty: ${(artist.royalty_pct * 100).toFixed(1)}%`;
+                    clone.querySelector('.artist-description').textContent = artist.work_type;
+
+                    // Use index+1 as ID for image naming (1.png, 2.png, etc)
+                    const imageId = index + 1;
+                    const imagePath = `/assets/artists/${imageId}.png`;
+
+                    // Try to load image, show random color if not found
+                    img.onload = () => {
+                        img.style.display = 'block';
+                        clone.querySelector('.artist-image').style.backgroundColor = 'transparent';
+                    };
+                    img.onerror = () => {
+                        img.style.display = 'none';
+                        clone.querySelector('.artist-image').style.backgroundColor = getRandomColor();
+                        clone.querySelector('.artist-image').style.width = '100px';
+                        clone.querySelector('.artist-image').style.height = '100px';
+                        clone.querySelector('.artist-image').style.borderRadius = '50%';
+                    };
+
+                    img.src = imagePath;
+                    img.alt = artist.artist_name;
+
+                    grid.appendChild(clone);
+                });
+            } catch (error) {
+                console.error('Error loading artists:', error);
+            }
+        }
+
+        // Load on page load
+        document.addEventListener('DOMContentLoaded', loadArtists);
+
+        // Setup modal
+        setupModal('artistModal', 'toggleFormBtn', 'closeModal', 'cancelFormBtn');
+
+        // Form submission handling
+        document.getElementById('artistForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = {
+                artist_name: document.getElementById('artistName').value,
+                royalty_pct: parseFloat(document.getElementById('royaltyPct').value),
+                advanced_paid: parseFloat(document.getElementById('advancedPaid').value) || 0
+            };
+
+            try {
+                const response = await fetch('/api/artists', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert(`Artist "${formData.artist_name}" added successfully!`);
+                    this.reset();
+                    document.getElementById('artistModal').style.display = 'none';
+                    setTimeout(() => location.reload(), 500);
+                } else {
+                    alert('Error adding artist');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+    </script>
+    
+</body>
+</html>

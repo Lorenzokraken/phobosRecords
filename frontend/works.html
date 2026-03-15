@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Works - Phobos Records</title>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="/assets/shared.css">
+    <style>
+        .songs-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        .song-item {
+            background-color: #181818;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .song-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        .cover-art {
+            flex-shrink: 0;
+        }
+
+        .cover-image {
+            width: 56px;
+            height: 56px;
+            border-radius: 4px;
+            object-fit: cover;
+        }
+
+        .song-number {
+            font-size: 18px;
+            font-weight: bold;
+            color: #b3b3b3;
+            min-width: 40px;
+        }
+
+        .song-info {
+            flex-grow: 1;
+        }
+
+        .song-info h3 {
+            font-size: 18px;
+            margin-bottom: 4px;
+            color: #ffffff;
+        }
+
+        .song-artist {
+            color: #b3b3b3;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .song-details {
+            color: #7a7a7a;
+            font-size: 13px;
+        }
+
+        .song-stats {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .streams,
+        .likes {
+            color: #b3b3b3;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <header class="top-bar">
+        <div class="logo-section">
+            <img src="/assets/phobos_logo.png" alt="Phobos Records Logo" class="logo">
+            <div class="brand-name">Phobos Records</div>
+        </div>
+        <nav>
+            <ul class="nav-menu">
+                <li><a href="/">Home</a></li>
+                <li><a href="/artists">Artists</a></li>
+                <li><a href="/works" class="active">Works</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main class="main">
+        <div class="page-header">
+            <h1 class="page-title">Our Works</h1>
+            <button id="toggleWorkFormBtn" class="toggle-form-btn">Add Work</button>
+        </div>
+
+        <div class="songs-list" id="worksList">
+                <!-- Works loaded dynamically from API -->
+        </div>
+
+        <template id="workItemTemplate">
+            <div class="song-item">
+                <div class="cover-art">
+                    <img src="" alt="" class="cover-image">
+                </div>
+                <div class="song-number"></div>
+                <div class="song-info">
+                    <h3 class="work-title"></h3>
+                    <p class="song-artist"></p>
+                    <p class="song-details"></p>
+                </div>
+                <div class="song-stats">
+                    <span class="streams"></span>
+                    <span class="likes"></span>
+                </div>
+            </div>
+        </template>
+
+        <div class="pagination">
+            <button class="pagination-btn active">1</button>
+            <button class="pagination-btn">2</button>
+            <button class="pagination-btn">3</button>
+            <button class="pagination-btn next">Next →</button>
+        </div>
+    </main>
+    
+    <!-- Modal Dialog for Adding Works -->
+    <div id="workModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="form-title">Add New Work</h2>
+                <button id="closeWorkModal" class="close-btn">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="workForm">
+                    <div class="form-group">
+                        <label for="artistSelect">Artist *</label>
+                        <select id="artistSelect" name="artistSelect" required>
+                            <option value="">Select an artist...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="workTitle">Work Title *</label>
+                        <input type="text" id="workTitle" name="workTitle" required>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="submit-btn">Add Work</button>
+                        <button type="button" id="cancelWorkFormBtn" class="reset-btn">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/assets/shared.js"></script>
+    <script>
+        // Generate random color
+        function getRandomColor() {
+            const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        // Load works from API
+        async function loadWorks() {
+            try {
+                const [worksRes, artistsRes] = await Promise.all([
+                    fetch('/api/works'),
+                    fetch('/api/artists')
+                ]);
+                const worksData = await worksRes.json();
+                const artistsData = await artistsRes.json();
+
+                // Create artist name map using array index as ID
+                const artistMap = {};
+                artistsData.artists.forEach((artist, index) => {
+                    artistMap[index] = artist.artist_name;
+                });
+
+                const list = document.getElementById('worksList');
+                const template = document.getElementById('workItemTemplate');
+
+                list.innerHTML = ''; // Clear existing
+
+                worksData.works.forEach((work, index) => {
+                    const clone = template.content.cloneNode(true);
+                    const img = clone.querySelector('img');
+
+                    clone.querySelector('.work-title').textContent = work.title;
+                    clone.querySelector('.song-number').textContent = String(index + 1).padStart(2, '0');
+                    clone.querySelector('.song-artist').textContent = artistMap[work.artist_id] || `Unknown (${work.artist_id})`;
+                    clone.querySelector('.song-details').textContent =
+                        `${(work.genre || ['Unknown'])[0]} • ${work.duration_seconds}s • ${work.bpm} BPM`;
+                    clone.querySelector('.streams').textContent = `${work.bpm} BPM`;
+                    clone.querySelector('.likes').textContent = `Key: ${work.key || 'N/A'}`;
+
+                    // Use index+1 as ID for image naming (1.png, 2.png, etc)
+                    const imageId = index + 1;
+                    const imagePath = `/assets/albums/${imageId}.png`;
+
+                    // Try to load image, show random color if not found
+                    img.onload = () => {
+                        img.style.display = 'block';
+                        clone.querySelector('.cover-art').style.backgroundColor = 'transparent';
+                    };
+                    img.onerror = () => {
+                        img.style.display = 'none';
+                        clone.querySelector('.cover-art').style.backgroundColor = getRandomColor();
+                        clone.querySelector('.cover-art').style.width = '56px';
+                        clone.querySelector('.cover-art').style.height = '56px';
+                    };
+
+                    img.src = imagePath;
+                    img.alt = work.title;
+
+                    list.appendChild(clone);
+                });
+            } catch (error) {
+                console.error('Error loading works:', error);
+            }
+        }
+
+        // Load artist dropdown dynamically
+        async function loadArtistSelect() {
+            const res = await fetch('/api/artists');
+            const data = await res.json();
+            const select = document.getElementById('artistSelect');
+            select.innerHTML = '<option value="">Select an artist...</option>';
+            data.artists.forEach((artist, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = artist.artist_name;
+                select.appendChild(opt);
+            });
+        }
+
+        // Load on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadWorks();
+            loadArtistSelect();
+        });
+
+        // Setup modal
+        setupModal('workModal', 'toggleWorkFormBtn', 'closeWorkModal', 'cancelWorkFormBtn');
+
+        // Form submission handling
+        document.getElementById('workForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const workData = {
+                artist_id: parseInt(document.getElementById('artistSelect').value),
+                title: document.getElementById('workTitle').value
+            };
+
+            try {
+                const response = await fetch('/api/works', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(workData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    const selectedArtist = document.querySelector(`#artistSelect option[value="${workData.artist_id}"]`).text;
+                    alert(`Work "${workData.title}" added for ${selectedArtist} successfully!`);
+                    this.reset();
+                    document.getElementById('workModal').style.display = 'none';
+                    setTimeout(() => location.reload(), 500);
+                } else {
+                    alert('Error adding work');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>
