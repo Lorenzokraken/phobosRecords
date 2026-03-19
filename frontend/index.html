@@ -421,16 +421,16 @@
         <!-- Featured Tracks -->
         <div style="margin-top: 40px; margin-bottom: 40px;">
             <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 20px; letter-spacing: -0.5px;">Featured Tracks</h2>
-            <div style="display: grid; grid-template-columns: 340px 1fr; gap: 24px; align-items: start;">
+            <div style="display: grid; grid-template-columns: 300px 1fr; gap: 24px; align-items: stretch;">
 
                 <!-- Left: Now Playing Card -->
-                <div id="nowPlayingCard" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); border-radius: 20px; padding: 28px; border: 1px solid rgba(255,215,0,0.15); position: relative; overflow: hidden;">
+                <div id="nowPlayingCard" style="background: linear-gradient(160deg, #1c1c1c 0%, #141414 60%, #1a1a1a 100%); border-radius: 20px; padding: 24px; border: 1px solid rgba(255,215,0,0.12); position: relative; overflow: hidden; display:flex; flex-direction:column; justify-content:space-between;">
                     <!-- Glow bg -->
                     <div id="cardGlow" style="position:absolute;top:-40px;left:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,215,0,0.08);filter:blur(40px);pointer-events:none;transition:all 0.8s;"></div>
 
                     <!-- Artwork -->
-                    <div style="position:relative; margin-bottom: 20px;">
-                        <div id="artworkWrap" style="width:100%;aspect-ratio:1;border-radius:14px;overflow:hidden;background:#282828;box-shadow:0 20px 60px rgba(0,0,0,0.6);transition:transform 0.3s;">
+                    <div style="position:relative; margin-bottom: 16px;">
+                        <div id="artworkWrap" style="width:100%;aspect-ratio:1;max-height:180px;border-radius:14px;overflow:hidden;background:#282828;box-shadow:0 12px 40px rgba(0,0,0,0.6);transition:transform 0.3s;">
                             <img id="playerCoverImg" src="/assets/albums/1.png" alt="" style="width:100%;height:100%;object-fit:cover;">
                         </div>
                         <!-- Spinning vinyl overlay when playing -->
@@ -438,13 +438,13 @@
                     </div>
 
                     <!-- Track info -->
-                    <div style="margin-bottom: 20px;">
+                    <div style="margin-bottom: 12px;">
                         <div id="playerTitle" style="font-size:18px;font-weight:700;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
                         <div id="playerArtist" style="font-size:13px;color:#b3b3b3;">—</div>
                     </div>
 
                     <!-- Progress -->
-                    <div style="margin-bottom: 16px;">
+                    <div style="margin-bottom: 12px;">
                         <input id="progressBar" type="range" min="0" max="100" value="0"
                             style="width:100%;height:4px;accent-color:#FFD700;cursor:pointer;background:linear-gradient(to right, #FFD700 0%, #333 0%);border-radius:2px;outline:none;-webkit-appearance:none;appearance:none;"
                             oninput="seek(this.value)">
