@@ -1,0 +1,138 @@
+INSERITO,SEGNALATO,MESE DI VENDITA,STORE,ARTISTA,TITOLO,QUANTITÀ,TIPO DI RISORSA,SPLIT,PAESE DI VENDITA,GUADAGNI (USD)
+2026-03-10,2026-03-11,2025-12,Apple Music,Lyra Void,Event Horizon,145,Stream,50.00%,US,42356
+2026-03-09,2026-03-10,2025-12,Spotify,Lyra Void,Event Horizon,78,Stream,50.00%,GB,18900
+2026-03-08,2026-03-09,2025-12,YouTube Music,Lyra Void,Event Horizon,102,Stream,48.00%,DE,21450
+2026-02-20,2026-02-21,2026-02,Spotify,Lyra Void,Dark Matter,95,Stream,50.00%,US,32100
+2026-02-20,2026-02-21,2026-01,YouTube Music,Lyra Void,Dark Matter,45,Stream,45.00%,GB,12450
+2026-02-20,2026-02-21,2026-02,Deezer,Lyra Void,Quantum Dreams,67,Stream,50.00%,FR,18900
+2026-02-19,2026-02-20,2026-02,iTunes,Lyra Void,Stellar Echo,12,Purchase,70.00%,US,4560
+2026-02-19,2026-02-20,2026-01,iTunes,Lyra Void,Dark Matter,8,Purchase,70.00%,US,3120
+2026-02-18,2026-02-19,2026-01,Amazon Music,Solaris,Cosmic Drift,78,Stream,55.00%,DE,21000
+2026-02-18,2026-02-19,2026-02,Spotify,Solaris,Quantum Dreams,56,Stream,52.00%,US,18200
+2026-02-17,2026-02-18,2026-01,Spotify,Solaris,Midnight Orbit,102,Stream,55.00%,US,28900
+2026-02-16,2026-02-17,2026-02,Tidal,Solaris,Solar Wind,34,Stream,60.00%,CA,12300
+2026-02-16,2026-02-17,2026-02,iTunes,Solaris,Midnight Orbit,5,Purchase,72.00%,US,1890
+2026-02-15,2026-02-16,2026-01,Spotify,Nebula,Starlight Serenade,89,Stream,40.00%,US,19800
+2026-02-14,2026-02-15,2026-02,YouTube Music,Nebula,Cosmic Dust,156,Stream,40.00%,UK,32100
+2026-02-13,2026-02-14,2026-02,Spotify,Nebula,Gravity Pull,72,Stream,40.00%,AU,16700
+2026-02-13,2026-02-14,2026-02,Deezer,Nebula,Starlight Serenade,34,Stream,42.00%,FR,9450
+2026-02-12,2026-02-13,2026-01,Apple Music,Echo Waves,Neon Nights,110,Stream,55.00%,US,35600
+2026-02-11,2026-02-12,2026-02,Spotify,Echo Waves,Retro Future,95,Stream,55.00%,JP,26700
+2026-02-11,2026-02-12,2026-02,YouTube Music,Echo Waves,Retro Future,67,Stream,52.00%,US,17800
+2026-02-10,2026-02-11,2026-01,YouTube Music,Echo Waves,Electric Pulse,87,Stream,55.00%,KR,24500
+2026-02-10,2026-02-11,2026-02,Tidal,Echo Waves,Neon Nights,45,Stream,58.00%,CA,13200
+2026-02-09,2026-02-10,2026-02,Spotify,Crimson Tide,Ocean Depths,54,Stream,45.00%,US,14200
+2026-02-08,2026-02-09,2026-02,Deezer,Crimson Tide,Storm Surge,43,Stream,45.00%,FR,11800
+2026-02-07,2026-02-08,2026-02,Tidal,Crimson Tide,Rising Waters,21,Stream,45.00%,NL,7800
+2026-02-07,2026-02-08,2026-02,Amazon Music,Crimson Tide,Ocean Depths,38,Stream,48.00%,DE,10200
+2026-02-06,2026-02-07,2026-02,Spotify,Velocity,Digital Rush,134,Stream,50.00%,US,38900
+2026-02-05,2026-02-06,2026-01,SoundCloud,Velocity,Speed of Light,201,Stream,48.00%,CA,42100
+2026-02-04,2026-02-05,2026-02,Spotify,Velocity,Electric Youth,167,Stream,50.00%,AU,39800
+2026-02-04,2026-02-05,2026-02,iTunes,Velocity,Speed of Light,9,Purchase,68.00%,US,3420
+2026-02-03,2026-02-04,2026-01,Spotify,Luna Moth,Moonlit Path,78,Stream,35.00%,US,13400
+2026-02-02,2026-02-03,2026-02,Apple Music,Luna Moth,Ancient Woods,65,Stream,35.00%,IE,11200
+2026-02-01,2026-02-02,2026-02,Spotify,Luna Moth,Silent Prayer,45,Stream,35.00%,UK,8900
+2026-02-01,2026-02-02,2026-02,Deezer,Luna Moth,Moonlit Path,32,Stream,33.00%,FR,5600
+2026-01-31,2026-02-01,2026-01,Spotify,Phoenix Rise,From Ashes,89,Stream,48.00%,US,21000
+2026-01-30,2026-01-31,2026-02,YouTube Music,Phoenix Rise,Burning Sky,123,Stream,48.00%,SE,28900
+2026-01-29,2026-01-30,2026-02,Spotify,Phoenix Rise,Reborn,76,Stream,48.00%,NO,19800
+2026-01-29,2026-01-30,2026-02,Tidal,Phoenix Rise,From Ashes,54,Stream,50.00%,SE,12300
+2026-01-28,2026-01-29,2026-02,Apple Music,Stellar Flare,Shooting Star,101,Stream,52.00%,US,28700
+2026-01-27,2026-01-28,2026-02,Spotify,Stellar Flare,Bright Horizon,92,Stream,52.00%,CA,25600
+2026-01-26,2026-01-27,2026-02,YouTube Music,Stellar Flare,Golden Hour,84,Stream,52.00%,AU,23400
+2026-01-26,2026-01-27,2026-02,iTunes,Stellar Flare,Shooting Star,7,Purchase,65.00%,US,2660
+2026-01-25,2026-01-26,2026-02,Spotify,Frost Byte,Frozen Circuit,115,Stream,58.00%,US,31200
+2026-01-24,2026-01-25,2026-02,SoundCloud,Frost Byte,Digital Blizzard,145,Stream,58.00%,JP,36700
+2026-01-23,2026-01-24,2026-02,Spotify,Frost Byte,Ice Cube,123,Stream,58.00%,KR,33400
+2026-01-23,2026-01-24,2026-02,YouTube Music,Frost Byte,Frozen Circuit,89,Stream,55.00%,GB,21400
+2026-03-12,2026-03-13,2026-03,Spotify,Neon Pulse,Neon Pulse,210,Stream,55.00%,US,58000
+2026-03-11,2026-03-12,2026-03,Apple Music,Neon Pulse,Neon Pulse,150,Stream,52.00%,GB,41000
+2026-03-10,2026-03-11,2026-03,YouTube Music,Neon Pulse,Pulse Wave,180,Stream,50.00%,DE,49500
+2026-03-09,2026-03-10,2026-03,Spotify,Cyber Dawn,Cyber Dawn,195,Stream,58.00%,JP,54200
+2026-03-08,2026-03-09,2026-03,Tidal,Cyber Dawn,Dawn Breaker,120,Stream,60.00%,US,35600
+2026-03-07,2026-03-08,2026-03,Deezer,Void Walker,Void Walker,85,Stream,45.00%,FR,22100
+2026-03-06,2026-03-07,2026-03,Spotify,Void Walker,Void Space,92,Stream,48.00%,DE,24500
+2026-03-05,2026-03-06,2026-03,Apple Music,Crystal Echo,Crystal Echo,130,Stream,54.00%,US,36800
+2026-03-04,2026-03-05,2026-03,Spotify,Crystal Echo,Crystal Clear,145,Stream,55.00%,CA,39200
+2026-03-03,2026-03-04,2026-03,YouTube Music,Iron Horizon,Iron Horizon,110,Stream,50.00%,UK,29500
+2026-03-02,2026-03-03,2026-03,Spotify,Iron Horizon,Iron Will,125,Stream,52.00%,US,33400
+2026-03-01,2026-03-02,2026-03,Tidal,Silent Orbit,Silent Orbit,75,Stream,58.00%,NL,19800
+2026-02-28,2026-03-01,2026-02,Spotify,Silent Orbit,Orbit Decay,88,Stream,50.00%,US,23100
+2026-02-27,2026-02-28,2026-02,Apple Music,Quantum Beat,Quantum Beat,160,Stream,56.00%,JP,45600
+2026-02-26,2026-02-27,2026-02,Spotify,Quantum Beat,Beat Drop,175,Stream,55.00%,US,48900
+2026-02-25,2026-02-26,2026-02,YouTube Music,Astral Plane,Astral Plane,140,Stream,52.00%,BR,38200
+2026-02-24,2026-02-25,2026-02,Spotify,Astral Plane,Plane Shift,155,Stream,54.00%,US,42100
+2026-02-23,2026-02-24,2026-02,Deezer,Midnight Sun,Midnight Sun,95,Stream,45.00%,FR,25400
+2026-02-22,2026-02-23,2026-02,Spotify,Midnight Sun,Sun Rise,105,Stream,50.00%,US,28700
+2026-02-21,2026-02-22,2026-02,Tidal,Gravity Well,Gravity Well,135,Stream,60.00%,CA,39500
+2026-02-20,2026-02-21,2026-02,Spotify,Gravity Well,Well Depth,148,Stream,55.00%,US,41200
+2026-03-15,2026-03-16,2026-03,Spotify,Lyra Void,Event Horizon,200,Stream,50.00%,US,58000
+2026-03-14,2026-03-15,2026-03,Apple Music,Solaris,Cosmic Drift,115,Stream,52.00%,GB,31200
+2026-03-13,2026-03-14,2026-03,YouTube Music,Nebula,Starlight Serenade,130,Stream,48.00%,DE,34500
+2026-03-12,2026-03-13,2026-03,Spotify,Echo Waves,Neon Nights,145,Stream,55.00%,US,39800
+2026-03-11,2026-03-12,2026-03,Deezer,Crimson Tide,Ocean Depths,65,Stream,45.00%,FR,17200
+2026-03-10,2026-03-11,2026-03,Spotify,Velocity,Digital Rush,180,Stream,50.00%,US,52000
+2026-03-09,2026-03-10,2026-03,SoundCloud,Luna Moth,Moonlit Path,90,Stream,40.00%,CA,24500
+2026-03-08,2026-03-09,2026-03,Spotify,Phoenix Rise,From Ashes,110,Stream,48.00%,US,26500
+2026-03-07,2026-03-08,2026-03,Apple Music,Stellar Flare,Shooting Star,125,Stream,52.00%,JP,34200
+2026-03-06,2026-03-07,2026-03,Spotify,Frost Byte,Frozen Circuit,140,Stream,58.00%,US,39100
+2026-03-05,2026-03-06,2026-03,Tidal,Neon Pulse,Pulse Wave,100,Stream,58.00%,CA,28900
+2026-03-04,2026-03-05,2026-03,Spotify,Cyber Dawn,Dawn Breaker,135,Stream,55.00%,US,37500
+2026-03-03,2026-03-04,2026-03,YouTube Music,Void Walker,Void Space,95,Stream,50.00%,DE,25600
+2026-03-02,2026-03-03,2026-03,Spotify,Crystal Echo,Crystal Clear,120,Stream,55.00%,US,32800
+2026-03-01,2026-03-02,2026-03,Deezer,Iron Horizon,Iron Will,85,Stream,45.00%,FR,22400
+2026-02-28,2026-03-01,2026-02,Spotify,Silent Orbit,Orbit Decay,105,Stream,50.00%,US,28100
+2026-02-27,2026-02-28,2026-02,Apple Music,Quantum Beat,Beat Drop,150,Stream,56.00%,JP,42300
+2026-02-26,2026-02-27,2026-02,Spotify,Astral Plane,Plane Shift,130,Stream,54.00%,US,35600
+2026-02-25,2026-02-26,2026-02,YouTube Music,Midnight Sun,Sun Rise,115,Stream,52.00%,BR,31200
+2026-02-24,2026-02-25,2026-02,Spotify,Gravity Well,Well Depth,140,Stream,55.00%,US,38900
+2026-03-20,2026-03-21,2026-03,Spotify,Lyra Void,Dark Matter,165,Stream,50.00%,US,47500
+2026-03-19,2026-03-20,2026-03,Apple Music,Solaris,Midnight Orbit,95,Stream,52.00%,GB,26800
+2026-03-18,2026-03-19,2026-03,YouTube Music,Nebula,Gravity Pull,110,Stream,48.00%,DE,29400
+2026-03-17,2026-03-18,2026-03,Spotify,Echo Waves,Retro Future,130,Stream,55.00%,US,35700
+2026-03-16,2026-03-17,2026-03,Deezer,Crimson Tide,Storm Surge,55,Stream,45.00%,FR,14800
+2026-03-15,2026-03-16,2026-03,Spotify,Velocity,Electric Youth,155,Stream,50.00%,US,44200
+2026-03-14,2026-03-15,2026-03,SoundCloud,Luna Moth,Ancient Woods,80,Stream,40.00%,CA,21500
+2026-03-13,2026-03-14,2026-03,Spotify,Phoenix Rise,Burning Sky,100,Stream,48.00%,US,24100
+2026-03-12,2026-03-13,2026-03,Apple Music,Stellar Flare,Bright Horizon,115,Stream,52.00%,JP,31500
+2026-03-11,2026-03-12,2026-03,Spotify,Frost Byte,Digital Blizzard,125,Stream,58.00%,US,35200
+2026-03-10,2026-03-11,2026-03,Tidal,Neon Pulse,Neon Pulse,90,Stream,58.00%,CA,26100
+2026-03-09,2026-03-10,2026-03,Spotify,Cyber Dawn,Cyber Dawn,120,Stream,55.00%,US,33400
+2026-03-08,2026-03-09,2026-03,YouTube Music,Void Walker,Void Walker,85,Stream,50.00%,DE,22800
+2026-03-07,2026-03-08,2026-03,Spotify,Crystal Echo,Crystal Echo,110,Stream,55.00%,US,30100
+2026-03-06,2026-03-07,2026-03,Deezer,Iron Horizon,Iron Horizon,75,Stream,45.00%,FR,19800
+2026-03-05,2026-03-06,2026-03,Spotify,Silent Orbit,Silent Orbit,95,Stream,50.00%,US,25400
+2026-03-04,2026-03-05,2026-03,Apple Music,Quantum Beat,Quantum Beat,140,Stream,56.00%,JP,39600
+2026-03-03,2026-03-04,2026-03,Spotify,Astral Plane,Astral Plane,120,Stream,54.00%,US,32800
+2026-03-02,2026-03-03,2026-03,YouTube Music,Midnight Sun,Midnight Sun,105,Stream,52.00%,BR,28500
+2026-03-01,2026-03-02,2026-03,Spotify,Gravity Well,Gravity Well,130,Stream,55.00%,US,36200
+2026-03-25,2026-03-26,2026-03,iTunes,Lyra Void,Event Horizon,15,Purchase,70.00%,US,5600
+2026-03-24,2026-03-25,2026-03,iTunes,Solaris,Cosmic Drift,10,Purchase,70.00%,US,3800
+2026-03-23,2026-03-24,2026-03,iTunes,Nebula,Starlight Serenade,8,Purchase,70.00%,US,2900
+2026-03-22,2026-03-23,2026-03,iTunes,Echo Waves,Neon Nights,12,Purchase,70.00%,US,4500
+2026-03-21,2026-03-22,2026-03,iTunes,Crimson Tide,Ocean Depths,6,Purchase,70.00%,US,2200
+2026-03-20,2026-03-21,2026-03,iTunes,Velocity,Digital Rush,14,Purchase,68.00%,US,5100
+2026-03-19,2026-03-20,2026-03,iTunes,Luna Moth,Moonlit Path,5,Purchase,65.00%,US,1800
+2026-03-18,2026-03-19,2026-03,iTunes,Phoenix Rise,From Ashes,9,Purchase,65.00%,US,3300
+2026-03-17,2026-03-18,2026-03,iTunes,Stellar Flare,Shooting Star,11,Purchase,65.00%,US,4000
+2026-03-16,2026-03-17,2026-03,iTunes,Frost Byte,Frozen Circuit,13,Purchase,65.00%,US,4700
+2026-03-15,2026-03-16,2026-03,iTunes,Neon Pulse,Neon Pulse,10,Purchase,68.00%,US,3600
+2026-03-14,2026-03-15,2026-03,iTunes,Cyber Dawn,Cyber Dawn,12,Purchase,68.00%,US,4300
+2026-03-13,2026-03-14,2026-03,iTunes,Void Walker,Void Walker,7,Purchase,65.00%,US,2500
+2026-03-12,2026-03-13,2026-03,iTunes,Crystal Echo,Crystal Echo,9,Purchase,65.00%,US,3200
+2026-03-11,2026-03-12,2026-03,iTunes,Iron Horizon,Iron Horizon,8,Purchase,65.00%,US,2900
+2026-03-10,2026-03-11,2026-03,iTunes,Silent Orbit,Silent Orbit,6,Purchase,65.00%,US,2100
+2026-03-09,2026-03-10,2026-03,iTunes,Quantum Beat,Quantum Beat,11,Purchase,68.00%,US,3900
+2026-03-08,2026-03-09,2026-03,iTunes,Astral Plane,Astral Plane,8,Purchase,65.00%,US,2800
+2026-03-07,2026-03-08,2026-03,iTunes,Midnight Sun,Midnight Sun,7,Purchase,65.00%,US,2500
+2026-03-06,2026-03-07,2026-03,iTunes,Gravity Well,Gravity Well,10,Purchase,68.00%,US,3500
+2026-03-28,2026-03-29,2026-03,Amazon Music,Lyra Void,Dark Matter,85,Stream,50.00%,DE,23500
+2026-03-27,2026-03-28,2026-03,Amazon Music,Solaris,Solar Wind,70,Stream,52.00%,DE,19200
+2026-03-26,2026-03-27,2026-03,Amazon Music,Nebula,Cosmic Dust,90,Stream,48.00%,DE,24100
+2026-03-25,2026-03-26,2026-03,Amazon Music,Echo Waves,Electric Pulse,95,Stream,50.00%,DE,26300
+2026-03-24,2026-03-25,2026-03,Amazon Music,Crimson Tide,Rising Waters,50,Stream,45.00%,DE,13500
+2026-03-23,2026-03-24,2026-03,Amazon Music,Velocity,Speed of Light,110,Stream,48.00%,DE,29800
+2026-03-22,2026-03-23,2026-03,Amazon Music,Luna Moth,Silent Prayer,60,Stream,40.00%,DE,16200
+2026-03-21,2026-03-22,2026-03,Amazon Music,Phoenix Rise,Reborn,80,Stream,48.00%,DE,21500
+2026-03-20,2026-03-21,2026-03,Amazon Music,Stellar Flare,Golden Hour,85,Stream,50.00%,DE,23100
+2026-03-19,2026-03-20,2026-03,Amazon Music,Frost Byte,Ice Cube,100,Stream,55.00%,DE,27400

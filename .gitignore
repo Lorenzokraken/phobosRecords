@@ -49,5 +49,4 @@ frontend/src/**/generated_image_*
 .DS_Store
 
 # Local data/cache
-data/
 node_modules/
