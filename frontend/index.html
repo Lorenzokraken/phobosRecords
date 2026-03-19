@@ -435,6 +435,44 @@
                 </div>
             </div>
         </div>
+
+        <!-- Second row charts -->
+        <div style="margin-top: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <!-- Revenue by Platform -->
+            <div style="background-color: #181818; border-radius: 12px; padding: 24px; border: 1px solid #282828;">
+                <h2 style="color: #ffffff; margin-bottom: 20px; font-size: 20px;">Revenue by Platform</h2>
+                <div style="position: relative; height: 300px;">
+                    <canvas id="platformChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Top 5 Works -->
+            <div style="background-color: #181818; border-radius: 12px; padding: 24px; border: 1px solid #282828;">
+                <h2 style="color: #ffffff; margin-bottom: 20px; font-size: 20px;">Top 5 Works</h2>
+                <div style="position: relative; height: 300px;">
+                    <canvas id="topWorksChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Third row charts -->
+        <div style="margin-top: 24px; display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 40px;">
+            <!-- Monthly Trend -->
+            <div style="background-color: #181818; border-radius: 12px; padding: 24px; border: 1px solid #282828;">
+                <h2 style="color: #ffffff; margin-bottom: 20px; font-size: 20px;">Monthly Revenue Trend</h2>
+                <div style="position: relative; height: 300px;">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Revenue by Genre Funnel -->
+            <div style="background-color: #181818; border-radius: 12px; padding: 24px; border: 1px solid #282828;">
+                <h2 style="color: #ffffff; margin-bottom: 20px; font-size: 20px;">Revenue by Genre</h2>
+                <div style="position: relative; height: 300px;">
+                    <canvas id="genreFunnelChart"></canvas>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -445,14 +483,18 @@
 
         async function loadDashboard() {
             try {
-                const [artistsRes, worksRes, revenueMonthRes, totRevRes, totUnitsRes, topArtistRes, releasesRes] = await Promise.all([
+                const [artistsRes, worksRes, revenueMonthRes, totRevRes, totUnitsRes, topArtistRes, releasesRes, platformRes, topWorksRes, trendRes, genreFunnelRes] = await Promise.all([
                     fetch('/api/artists'),
                     fetch('/api/works'),
                     fetch('/api/revenue/by-artist-month'),
                     fetch('/tot_revenue'),
                     fetch('/tot_unit_sold'),
                     fetch('/get_top_artist'),
-                    fetch('/recent_releases?limit=3')
+                    fetch('/recent_releases?limit=3'),
+                    fetch('/revenue_by_platform'),
+                    fetch('/top_works?limit=5'),
+                    fetch('/monthly_trend'),
+                    fetch('/revenue_by_genre')
                 ]);
                 const artistsData = await artistsRes.json();
                 const worksData = await worksRes.json();
@@ -461,6 +503,10 @@
                 const totUnitsData = await totUnitsRes.json();
                 const topArtistData = await topArtistRes.json();
                 const releasesData = await releasesRes.json();
+                const platformData = await platformRes.json();
+                const topWorksData = await topWorksRes.json();
+                const trendData = await trendRes.json();
+                const genreFunnelData = await genreFunnelRes.json();
 
                 const artists = artistsData.artists;
                 const works = worksData.works;
@@ -701,6 +747,123 @@
                                         padding: 15
                                     }
                                 }
+                            }
+                        }
+                    });
+                }
+
+                // --- Revenue by Platform (Bar) ---
+                const platformCanvas = document.getElementById('platformChart');
+                if (platformCanvas && platformData.platforms?.length) {
+                    new Chart(platformCanvas, {
+                        type: 'bar',
+                        data: {
+                            labels: platformData.platforms.map(p => p.platform),
+                            datasets: [{
+                                label: 'Revenue ($)',
+                                data: platformData.platforms.map(p => p.revenue),
+                                backgroundColor: ['#1DB954', '#FF6B6B', '#4ECDC4', '#FFA07A', '#BB8FCE'],
+                                borderRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: { ticks: { color: '#b3b3b3' }, grid: { color: '#282828' } },
+                                x: { ticks: { color: '#b3b3b3' }, grid: { color: '#282828' } }
+                            }
+                        }
+                    });
+                }
+
+                // --- Top 5 Works (Horizontal Bar) ---
+                const topWorksCanvas = document.getElementById('topWorksChart');
+                if (topWorksCanvas && topWorksData.works?.length) {
+                    new Chart(topWorksCanvas, {
+                        type: 'bar',
+                        data: {
+                            labels: topWorksData.works.map(w => w.title),
+                            datasets: [{
+                                label: 'Revenue ($)',
+                                data: topWorksData.works.map(w => w.gross_revenue),
+                                backgroundColor: '#4ECDC4',
+                                borderRadius: 6
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: { ticks: { color: '#b3b3b3' }, grid: { color: '#282828' } },
+                                x: { ticks: { color: '#b3b3b3' }, grid: { color: '#282828' } }
+                            }
+                        }
+                    });
+                }
+
+                // --- Monthly Trend (Area) ---
+                const trendCanvas = document.getElementById('trendChart');
+                if (trendCanvas && trendData.trend?.length) {
+                    new Chart(trendCanvas, {
+                        type: 'line',
+                        data: {
+                            labels: trendData.trend.map(t => t.month),
+                            datasets: [{
+                                label: 'Revenue ($)',
+                                data: trendData.trend.map(t => t.revenue),
+                                borderColor: '#FF6B6B',
+                                backgroundColor: 'rgba(255,107,107,0.15)',
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 4,
+                                pointBackgroundColor: '#FF6B6B'
+                            }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        afterLabel: (ctx) => {
+                                            const g = trendData.trend[ctx.dataIndex].growth_pct;
+                                            return g !== null ? `Growth: ${g > 0 ? '+' : ''}${g}%` : '';
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: { ticks: { color: '#b3b3b3' }, grid: { color: '#282828' } },
+                                x: { ticks: { color: '#b3b3b3' }, grid: { color: '#282828' } }
+                            }
+                        }
+                    });
+                }
+
+                // --- Revenue by Genre (Horizontal Bar Funnel) ---
+                const genreFunnelCanvas = document.getElementById('genreFunnelChart');
+                if (genreFunnelCanvas && genreFunnelData.genres?.length) {
+                    const topGenres = genreFunnelData.genres.slice(0, 8);
+                    new Chart(genreFunnelCanvas, {
+                        type: 'bar',
+                        data: {
+                            labels: topGenres.map(g => g.genre || 'Unknown'),
+                            datasets: [{
+                                label: 'Revenue ($)',
+                                data: topGenres.map(g => g.gross_revenue),
+                                backgroundColor: '#F7DC6F',
+                                borderRadius: 6
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: { ticks: { color: '#b3b3b3', font: { size: 11 } }, grid: { color: '#282828' } },
+                                x: { ticks: { color: '#b3b3b3' }, grid: { color: '#282828' } }
                             }
                         }
                     });

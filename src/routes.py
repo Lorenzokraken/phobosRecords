@@ -392,6 +392,104 @@ def create_artist(artist: ArtistCreate, db=Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.get("/revenue_by_platform")
+def revenue_by_platform(
+    year: Optional[int] = Query(None),
+    db=Depends(get_db)
+):
+    """Revenue lorda per piattaforma (Spotify, Deezer, ecc.)."""
+    logger.info(f"GET /revenue_by_platform - year={year}")
+    cur = db.cursor()
+    where = ("WHERE EXTRACT(YEAR FROM period) = %s" if year is not None else "")
+    params = [year] if year is not None else []
+    cur.execute(f"""
+        SELECT platform, COALESCE(SUM(gross_rev), 0) AS revenue
+        FROM transactions
+        {where}
+        GROUP BY platform
+        ORDER BY revenue DESC
+    """, params)
+    rows = cur.fetchall()
+    cur.close()
+    return {"platforms": [{"platform": r[0], "revenue": float(r[1])} for r in rows]}
+
+
+@router.get("/top_works")
+def top_works(
+    limit: int = Query(5, ge=1, le=20),
+    year: Optional[int] = Query(None),
+    db=Depends(get_db)
+):
+    """Top opere per revenue lorda."""
+    logger.info(f"GET /top_works - limit={limit} year={year}")
+    cur = db.cursor()
+    where = ("WHERE EXTRACT(YEAR FROM t.period) = %s" if year is not None else "")
+    params = [year] if year is not None else []
+    cur.execute(f"""
+        SELECT w.work_id, w.title, a.name AS artist_name,
+               COALESCE(SUM(t.gross_rev), 0) AS gross_revenue
+        FROM works w
+        JOIN artists a ON w.artist_id = a.artist_id
+        LEFT JOIN transactions t ON w.work_id = t.work_id
+        {where}
+        GROUP BY w.work_id, w.title, a.name
+        ORDER BY gross_revenue DESC
+        LIMIT %s
+    """, params + [limit])
+    rows = cur.fetchall()
+    cur.close()
+    return {"works": [{"work_id": r[0], "title": r[1], "artist_name": r[2], "gross_revenue": float(r[3])} for r in rows]}
+
+
+@router.get("/monthly_trend")
+def monthly_trend(db=Depends(get_db)):
+    """Trend mensile totale revenue con variazione percentuale."""
+    logger.info("GET /monthly_trend")
+    cur = db.cursor()
+    cur.execute("""
+        SELECT purchase_month, COALESCE(SUM(gross_rev), 0) AS revenue
+        FROM transactions
+        WHERE purchase_month IS NOT NULL
+        GROUP BY purchase_month
+        ORDER BY purchase_month
+    """)
+    rows = cur.fetchall()
+    cur.close()
+    result = []
+    for i, r in enumerate(rows):
+        prev = float(rows[i-1][1]) if i > 0 else None
+        curr = float(r[1])
+        growth = round((curr - prev) / prev * 100, 2) if prev and prev > 0 else None
+        result.append({"month": r[0], "revenue": curr, "growth_pct": growth})
+    return {"trend": result}
+
+
+@router.get("/revenue_by_genre")
+def revenue_by_genre(
+    year: Optional[int] = Query(None),
+    db=Depends(get_db)
+):
+    """Revenue e unità vendute per genere (funnel)."""
+    logger.info(f"GET /revenue_by_genre - year={year}")
+    cur = db.cursor()
+    where = ("WHERE EXTRACT(YEAR FROM t.period) = %s" if year is not None else "")
+    params = [year] if year is not None else []
+    cur.execute(f"""
+        SELECT a.main_genre,
+               COUNT(t.transaction_id) AS units_sold,
+               COALESCE(SUM(t.gross_rev), 0) AS gross_revenue
+        FROM artists a
+        LEFT JOIN works w ON a.artist_id = w.artist_id
+        LEFT JOIN transactions t ON w.work_id = t.work_id
+        {where}
+        GROUP BY a.main_genre
+        ORDER BY gross_revenue DESC
+    """, params)
+    rows = cur.fetchall()
+    cur.close()
+    return {"genres": [{"genre": r[0], "units_sold": r[1], "gross_revenue": float(r[2])} for r in rows]}
+
+
 @router.post("/create_work")
 def create_work(work: WorkCreate, db=Depends(get_db)):
     """Crea una nuova opera nel database."""
