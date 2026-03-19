@@ -321,6 +321,7 @@
                 <li><a href="/" class="active">Home</a></li>
                 <li><a href="/artists">Artists</a></li>
                 <li><a href="/works">Works</a></li>
+                <li><a href="/analytics">Analytics</a></li>
             </ul>
         </nav>
     </header>
@@ -417,520 +418,233 @@
             </div>
         </div>
 
-        <!-- Charts Container -->
-        <div style="margin-top: 40px; display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
-            <!-- Sales by Artist Chart -->
-            <div style="background-color: #181818; border-radius: 12px; padding: 24px; border: 1px solid #282828;">
-                <h2 style="color: #ffffff; margin-bottom: 20px; font-size: 20px;">Sales by Artist</h2>
-                <div style="position: relative; height: 400px; overflow-x: auto;">
-                    <canvas id="salesChart"></canvas>
-                </div>
-            </div>
+        <!-- Featured Tracks -->
+        <div style="margin-top: 40px; margin-bottom: 40px;">
+            <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 20px; letter-spacing: -0.5px;">Featured Tracks</h2>
+            <div style="display: grid; grid-template-columns: 340px 1fr; gap: 24px; align-items: start;">
 
-            <!-- Genre Distribution Chart -->
-            <div style="background-color: #181818; border-radius: 12px; padding: 24px; border: 1px solid #282828;">
-                <h2 style="color: #ffffff; margin-bottom: 20px; font-size: 20px;">Music Genres</h2>
-                <div style="position: relative; height: 400px; display: flex; justify-content: center; align-items: center;">
-                    <canvas id="genreChart" style="max-width: 100%; cursor: pointer;"></canvas>
+                <!-- Left: Now Playing Card -->
+                <div id="nowPlayingCard" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); border-radius: 20px; padding: 28px; border: 1px solid rgba(255,215,0,0.15); position: relative; overflow: hidden;">
+                    <!-- Glow bg -->
+                    <div id="cardGlow" style="position:absolute;top:-40px;left:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,215,0,0.08);filter:blur(40px);pointer-events:none;transition:all 0.8s;"></div>
+
+                    <!-- Artwork -->
+                    <div style="position:relative; margin-bottom: 20px;">
+                        <div id="artworkWrap" style="width:100%;aspect-ratio:1;border-radius:14px;overflow:hidden;background:#282828;box-shadow:0 20px 60px rgba(0,0,0,0.6);transition:transform 0.3s;">
+                            <img id="playerCoverImg" src="/assets/albums/1.png" alt="" style="width:100%;height:100%;object-fit:cover;">
+                        </div>
+                        <!-- Spinning vinyl overlay when playing -->
+                        <div id="vinylDisc" style="position:absolute;bottom:-12px;right:-12px;width:64px;height:64px;border-radius:50%;background:radial-gradient(circle at 30% 30%, #444, #111);border:3px solid #FFD700;display:flex;align-items:center;justify-content:center;font-size:20px;transition:all 0.3s;box-shadow:0 4px 20px rgba(255,215,0,0.3);">🎵</div>
+                    </div>
+
+                    <!-- Track info -->
+                    <div style="margin-bottom: 20px;">
+                        <div id="playerTitle" style="font-size:18px;font-weight:700;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
+                        <div id="playerArtist" style="font-size:13px;color:#b3b3b3;">—</div>
+                    </div>
+
+                    <!-- Progress -->
+                    <div style="margin-bottom: 16px;">
+                        <input id="progressBar" type="range" min="0" max="100" value="0"
+                            style="width:100%;height:4px;accent-color:#FFD700;cursor:pointer;background:linear-gradient(to right, #FFD700 0%, #333 0%);border-radius:2px;outline:none;-webkit-appearance:none;appearance:none;"
+                            oninput="seek(this.value)">
+                        <div style="display:flex;justify-content:space-between;margin-top:6px;">
+                            <span id="currentTime" style="font-size:11px;color:#b3b3b3;">0:00</span>
+                            <span id="duration" style="font-size:11px;color:#b3b3b3;">0:00</span>
+                        </div>
+                    </div>
+
+                    <!-- Controls -->
+                    <div style="display:flex;align-items:center;justify-content:center;gap:20px;">
+                        <button onclick="changeTrack(-1)" style="background:none;border:none;color:#b3b3b3;cursor:pointer;font-size:20px;padding:8px;border-radius:50%;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#b3b3b3'">⏮</button>
+                        <button id="playPauseBtn" onclick="togglePlay()"
+                            style="background:#FFD700;border:none;color:#000;cursor:pointer;width:52px;height:52px;border-radius:50%;font-size:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(255,215,0,0.4);transition:all 0.2s;font-weight:bold;">▶</button>
+                        <button onclick="changeTrack(1)" style="background:none;border:none;color:#b3b3b3;cursor:pointer;font-size:20px;padding:8px;border-radius:50%;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#b3b3b3'">⏭</button>
+                    </div>
+                </div>
+
+                <!-- Right: Track List -->
+                <div style="background-color:#181818;border-radius:20px;border:1px solid #282828;overflow:hidden;">
+                    <div style="padding:20px 24px 12px;border-bottom:1px solid #282828;">
+                        <span style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#b3b3b3;">Playlist</span>
+                    </div>
+                    <div id="trackList"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Second row charts -->
-        <div style="margin-top: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
-            <!-- Revenue by Platform -->
-            <div style="background-color: #181818; border-radius: 12px; padding: 24px; border: 1px solid #282828;">
-                <h2 style="color: #ffffff; margin-bottom: 20px; font-size: 20px;">Revenue by Platform</h2>
-                <div style="position: relative; height: 300px;">
-                    <canvas id="platformChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Top 5 Works -->
-            <div style="background-color: #181818; border-radius: 12px; padding: 24px; border: 1px solid #282828;">
-                <h2 style="color: #ffffff; margin-bottom: 20px; font-size: 20px;">Top 5 Works</h2>
-                <div style="position: relative; height: 300px;">
-                    <canvas id="topWorksChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Third row charts -->
-        <div style="margin-top: 24px; display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 40px;">
-            <!-- Monthly Trend -->
-            <div style="background-color: #181818; border-radius: 12px; padding: 24px; border: 1px solid #282828;">
-                <h2 style="color: #ffffff; margin-bottom: 20px; font-size: 20px;">Monthly Revenue Trend</h2>
-                <div style="position: relative; height: 300px;">
-                    <canvas id="trendChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Revenue by Genre Funnel -->
-            <div style="background-color: #181818; border-radius: 12px; padding: 24px; border: 1px solid #282828;">
-                <h2 style="color: #ffffff; margin-bottom: 20px; font-size: 20px;">Revenue by Genre</h2>
-                <div style="position: relative; height: 300px;">
-                    <canvas id="genreFunnelChart"></canvas>
-                </div>
-            </div>
-        </div>
+        <style>
+            @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+            @keyframes pulse { 0%,100% { box-shadow: 0 0 20px rgba(255,215,0,0.4); } 50% { box-shadow: 0 0 35px rgba(255,215,0,0.7); } }
+            #progressBar::-webkit-slider-thumb { -webkit-appearance:none; width:12px; height:12px; border-radius:50%; background:#FFD700; cursor:pointer; }
+            #progressBar::-moz-range-thumb { width:12px; height:12px; border-radius:50%; background:#FFD700; cursor:pointer; border:none; }
+            .track-row:hover { background-color: #1e1e1e !important; }
+            .vinyl-spin { animation: spin 3s linear infinite; }
+            .play-pulse { animation: pulse 1.5s ease-in-out infinite; }
+        </style>
     </div>
 
     <script>
-        // State for interactive charts
-        let salesChartInstance = null;
-        let genreChartInstance = null;
-        let platformChartInstance = null;
-        let topWorksChartInstance = null;
-        let trendChartInstance = null;
-        let currentSelectedGenre = null;
-
+        // --- KPI Loader ---
         async function loadDashboard() {
             try {
-                const [artistsRes, worksRes, revenueMonthRes, totRevRes, totUnitsRes, topArtistRes, releasesRes, platformRes, platformDetailRes, topWorksRes, trendRes, genreFunnelRes] = await Promise.all([
-                    fetch('/api/artists'),
-                    fetch('/api/works'),
-                    fetch('/api/revenue/by-artist-month'),
+                const [totRevRes, totUnitsRes, topArtistRes, releasesRes] = await Promise.all([
                     fetch('/tot_revenue'),
                     fetch('/tot_unit_sold'),
                     fetch('/get_top_artist'),
-                    fetch('/recent_releases?limit=3'),
-                    fetch('/revenue_by_platform'),
-                    fetch('/revenue_by_platform_detail'),
-                    fetch('/top_works?limit=5'),
-                    fetch('/monthly_trend'),
-                    fetch('/revenue_by_genre')
+                    fetch('/recent_releases?limit=3')
                 ]);
-                const artistsData = await artistsRes.json();
-                const worksData = await worksRes.json();
-                const revenueMonthData = await revenueMonthRes.json();
                 const totRevData = await totRevRes.json();
                 const totUnitsData = await totUnitsRes.json();
                 const topArtistData = await topArtistRes.json();
                 const releasesData = await releasesRes.json();
-                const platformData = await platformRes.json();
-                const platformDetailData = await platformDetailRes.json();
-                const topWorksData = await topWorksRes.json();
-                const trendData = await trendRes.json();
-                const genreFunnelData = await genreFunnelRes.json();
 
-                const artists = artistsData.artists;
-                const works = worksData.works;
-                const revenueByMonth = revenueMonthData.revenues;
-
-                // Map genre → artists for interactivity
-                const genreToArtists = {};
-                artists.forEach(artist => {
-                    const genre = artist.main_genre || 'Unknown';
-                    if (!genreToArtists[genre]) genreToArtists[genre] = new Set();
-                    genreToArtists[genre].add(artist.artist_name);
-                });
-
-                // Update date
                 document.querySelector('.dashboard-header p').textContent =
                     `Last updated: ${new Date().toLocaleDateString('en-GB', {day: 'numeric', month: 'long', year: 'numeric'})}`;
-
-                // Update Total Units from DB
                 document.querySelector('[data-metric="units"]').textContent = totUnitsData.total_units.toLocaleString();
-
-                // Update Revenue from DB
                 document.querySelector('[data-metric="revenue"]').textContent = `$${totRevData.total_revenue.toLocaleString()}`;
-
-                // Top Artist from DB
                 document.querySelector('[data-metric="top-artist-name"]').textContent = topArtistData.artist_name || '—';
                 document.querySelector('[data-metric="top-artist-genre"]').textContent = topArtistData.main_genre || '—';
                 document.querySelector('[data-metric="top-artist-streams"]').textContent = `$${topArtistData.total_revenue?.toLocaleString() || 0}`;
 
-                // Recent Releases from DB
                 const releaseList = document.querySelector('[data-metric="releases-list"]');
                 releaseList.innerHTML = '';
-
                 releasesData.releases.forEach((release, idx) => {
                     const releaseItem = document.createElement('div');
                     releaseItem.className = 'release-item';
-
                     const releaseIconDiv = document.createElement('div');
                     releaseIconDiv.className = 'release-icon';
                     releaseIconDiv.style.fontSize = '0';
-
                     const img = document.createElement('img');
                     img.src = `/assets/albums/${idx + 1}.png`;
                     img.style.cssText = 'width:40px;height:40px;border-radius:4px;object-fit:cover;';
-                    img.onerror = () => {
-                        img.style.display = 'none';
-                        releaseIconDiv.textContent = ['💿', '🎵', '🎶'][idx % 3];
-                        releaseIconDiv.style.fontSize = '18px';
-                    };
+                    img.onerror = () => { img.style.display = 'none'; releaseIconDiv.textContent = ['💿', '🎵', '🎶'][idx % 3]; releaseIconDiv.style.fontSize = '18px'; };
                     img.onload = () => { releaseIconDiv.innerHTML = ''; releaseIconDiv.appendChild(img); };
-
-                    releaseItem.innerHTML = `
-                        <div class="release-info">
-                            <div class="release-details">
-                                <h4>${release.title}</h4>
-                                <p>${release.artist_name}</p>
-                            </div>
-                        </div>
-                        <div class="release-type">${release.release_date?.substring(0, 7) || ''}</div>
-                    `;
+                    releaseItem.innerHTML = `<div class="release-info"><div class="release-details"><h4>${release.title}</h4><p>${release.artist_name}</p></div></div><div class="release-type">${release.release_date?.substring(0, 7) || ''}</div>`;
                     releaseItem.insertBefore(releaseIconDiv, releaseItem.querySelector('.release-info'));
                     releaseList.appendChild(releaseItem);
                 });
-
-                // Create Revenue by Artist Over Time Chart
-                const artistColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2', '#FF6B9D', '#C44569', '#FFA502', '#FFE66D', '#95E1D3', '#F38181'];
-
-                // Get all unique months from revenue data
-                const allMonths = new Set();
-                revenueByMonth.forEach(item => {
-                    if (item.month) allMonths.add(item.month);
-                });
-                const sortedMonths = Array.from(allMonths).sort();
-
-                // Organize revenue by artist and month
-                const revenueByArtistMonth = {};
-                artists.forEach(artist => {
-                    revenueByArtistMonth[artist.artist_name] = {};
-                    sortedMonths.forEach(month => {
-                        revenueByArtistMonth[artist.artist_name][month] = 0;
-                    });
-                });
-
-                revenueByMonth.forEach(item => {
-                    if (revenueByArtistMonth[item.artist_name]) {
-                        revenueByArtistMonth[item.artist_name][item.month] = item.revenue;
-                    }
-                });
-
-                // Create datasets for each artist that has revenue data
-                const datasets = artists.map((artist, idx) => {
-                    const data = sortedMonths.map(month => Math.sqrt(revenueByArtistMonth[artist.artist_name][month] || 0));
-                    return {
-                        label: artist.artist_name,
-                        data: data,
-                        borderColor: artistColors[idx % artistColors.length],
-                        backgroundColor: 'transparent',
-                        borderWidth: 2,
-                        tension: 0.4,
-                        pointRadius: 3,
-                        pointHoverRadius: 5,
-                        pointBackgroundColor: artistColors[idx % artistColors.length]
-                    };
-                }).filter(d => d.data.some(v => v > 0));
-
-                // Save original colors as map (artist name → color)
-                const originalColors = {};
-                datasets.forEach((dataset) => {
-                    originalColors[dataset.label] = dataset.borderColor;
-                });
-
-                // Filter/reset all charts by genre
-                function filterAllCharts(genre) {
-                    const artistsInGenre = genreToArtists[genre] || new Set();
-
-                    // Line chart
-                    salesChartInstance.data.datasets.forEach((dataset) => {
-                        const isMatch = artistsInGenre.has(dataset.label);
-                        dataset.borderColor = isMatch ? originalColors[dataset.label] : 'rgba(255,255,255,0.08)';
-                        dataset.pointBackgroundColor = isMatch ? originalColors[dataset.label] : 'rgba(255,255,255,0.08)';
-                        dataset.borderWidth = isMatch ? 3 : 1;
-                    });
-                    salesChartInstance.update();
-
-                    // Platform chart — ricalcola con solo gli artisti del genere
-                    if (platformChartInstance) {
-                        const filteredPlatforms = {};
-                        platformDetailData.detail.forEach(row => {
-                            if (artistsInGenre.has(row.artist_name)) {
-                                filteredPlatforms[row.platform] = (filteredPlatforms[row.platform] || 0) + row.revenue;
-                            }
-                        });
-                        platformChartInstance.data.datasets[0].data = platformData.platforms.map(p =>
-                            filteredPlatforms[p.platform] || 0
-                        );
-                        platformChartInstance.update();
-                    }
-
-                    // Top works chart — evidenzia solo le opere degli artisti nel genere
-                    if (topWorksChartInstance) {
-                        topWorksChartInstance.data.datasets[0].backgroundColor = topWorksData.works.map(w =>
-                            artistsInGenre.has(w.artist_name) ? '#4ECDC4' : 'rgba(78,205,196,0.15)'
-                        );
-                        topWorksChartInstance.update();
-                    }
-
-                    // Trend chart — ricalcola con solo gli artisti del genere
-                    if (trendChartInstance) {
-                        const filteredTrend = {};
-                        revenueByMonth.forEach(item => {
-                            if (artistsInGenre.has(item.artist_name) && item.month) {
-                                filteredTrend[item.month] = (filteredTrend[item.month] || 0) + item.revenue;
-                            }
-                        });
-                        const trendMonths = trendData.trend.map(t => t.month);
-                        trendChartInstance.data.datasets[0].data = trendMonths.map(m => filteredTrend[m] || 0);
-                        trendChartInstance.update();
-                    }
-                }
-
-                function resetAllCharts() {
-                    salesChartInstance.data.datasets.forEach((dataset) => {
-                        dataset.borderColor = originalColors[dataset.label];
-                        dataset.pointBackgroundColor = originalColors[dataset.label];
-                        dataset.borderWidth = 2;
-                    });
-                    salesChartInstance.update();
-
-                    if (platformChartInstance) {
-                        platformChartInstance.data.datasets[0].data = platformData.platforms.map(p => p.revenue);
-                        platformChartInstance.update();
-                    }
-
-                    if (topWorksChartInstance) {
-                        topWorksChartInstance.data.datasets[0].backgroundColor = topWorksData.works.map(() => '#4ECDC4');
-                        topWorksChartInstance.update();
-                    }
-
-                    if (trendChartInstance) {
-                        trendChartInstance.data.datasets[0].data = trendData.trend.map(t => t.revenue);
-                        trendChartInstance.update();
-                    }
-                }
-
-                const chartCanvas = document.getElementById('salesChart');
-                if (chartCanvas && sortedMonths.length > 0) {
-                    salesChartInstance = new Chart(chartCanvas, {
-                        type: 'line',
-                        data: {
-                            labels: sortedMonths,
-                            datasets: datasets
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    display: true,
-                                    position: 'bottom',
-                                    labels: {
-                                        color: '#b3b3b3',
-                                        usePointStyle: true,
-                                        padding: 15
-                                    }
-                                }
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    ticks: {
-                                        color: '#b3b3b3'
-                                    },
-                                    grid: {
-                                        color: '#282828'
-                                    },
-                                    title: {
-                                        display: true,
-                                        text: 'Revenue'
-                                    }
-                                },
-                                x: {
-                                    ticks: {
-                                        color: '#b3b3b3'
-                                    },
-                                    grid: {
-                                        color: '#282828'
-                                    }
-                                }
-                            }
-                        }
-                    });
-                }
-
-                // Create Genre Distribution Chart (count artists per genre)
-                const genreCount = {};
-                artists.forEach(artist => {
-                    const genre = artist.main_genre || 'Unknown';
-                    genreCount[genre] = (genreCount[genre] || 0) + 1;
-                });
-
-                const genres = Object.entries(genreCount)
-                    .sort((a, b) => b[1] - a[1])
-                    .slice(0, 8);
-
-                const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'];
-
-                const originalGenreColors = colors.slice(0, genres.length);
-
-                const genreCanvas = document.getElementById('genreChart');
-                if (genreCanvas && genres.length > 0) {
-                    genreChartInstance = new Chart(genreCanvas, {
-                        type: 'doughnut',
-                        data: {
-                            labels: genres.map(g => g[0]),
-                            datasets: [{
-                                data: genres.map(g => g[1]),
-                                backgroundColor: colors.slice(0, genres.length),
-                                borderColor: '#181818',
-                                borderWidth: 2
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            onClick: (event, elements) => {
-                                if (!elements.length) return;
-                                const clickedIndex = elements[0].index;
-                                const selectedGenre = genres[clickedIndex][0];
-                                if (currentSelectedGenre === selectedGenre) {
-                                    currentSelectedGenre = null;
-                                    resetAllCharts();
-                                    genreChartInstance.data.datasets[0].backgroundColor = originalGenreColors;
-                                } else {
-                                    currentSelectedGenre = selectedGenre;
-                                    filterAllCharts(selectedGenre);
-                                    genreChartInstance.data.datasets[0].backgroundColor = genres.map((_, i) =>
-                                        i === clickedIndex ? originalGenreColors[i] : 'rgba(128,128,128,0.2)'
-                                    );
-                                }
-                                genreChartInstance.update();
-                            },
-                            plugins: {
-                                legend: {
-                                    position: 'right',
-                                    labels: {
-                                        color: '#b3b3b3',
-                                        font: {
-                                            size: 12
-                                        },
-                                        padding: 15
-                                    }
-                                }
-                            }
-                        }
-                    });
-                }
-
-                // --- Revenue by Platform (Bar) ---
-                const platformCanvas = document.getElementById('platformChart');
-                if (platformCanvas && platformData.platforms?.length) {
-                    platformChartInstance = new Chart(platformCanvas, {
-                        type: 'bar',
-                        data: {
-                            labels: platformData.platforms.map(p => p.platform),
-                            datasets: [{
-                                label: 'Revenue ($)',
-                                data: platformData.platforms.map(p => p.revenue),
-                                backgroundColor: ['#1DB954', '#FF6B6B', '#4ECDC4', '#FFA07A', '#BB8FCE'],
-                                borderRadius: 6
-                            }]
-                        },
-                        options: {
-                            responsive: true, maintainAspectRatio: false,
-                            plugins: { legend: { display: false } },
-                            scales: {
-                                y: { ticks: { color: '#b3b3b3' }, grid: { color: '#282828' } },
-                                x: { ticks: { color: '#b3b3b3' }, grid: { color: '#282828' } }
-                            }
-                        }
-                    });
-                }
-
-                // --- Top 5 Works (Horizontal Bar) ---
-                const topWorksCanvas = document.getElementById('topWorksChart');
-                if (topWorksCanvas && topWorksData.works?.length) {
-                    topWorksChartInstance = new Chart(topWorksCanvas, {
-                        type: 'bar',
-                        data: {
-                            labels: topWorksData.works.map(w => w.title),
-                            datasets: [{
-                                label: 'Revenue ($)',
-                                data: topWorksData.works.map(w => w.gross_revenue),
-                                backgroundColor: '#4ECDC4',
-                                borderRadius: 6
-                            }]
-                        },
-                        options: {
-                            indexAxis: 'y',
-                            responsive: true, maintainAspectRatio: false,
-                            plugins: { legend: { display: false } },
-                            scales: {
-                                y: { ticks: { color: '#b3b3b3' }, grid: { color: '#282828' } },
-                                x: { ticks: { color: '#b3b3b3' }, grid: { color: '#282828' } }
-                            }
-                        }
-                    });
-                }
-
-                // --- Monthly Trend (Area) ---
-                const trendCanvas = document.getElementById('trendChart');
-                if (trendCanvas && trendData.trend?.length) {
-                    trendChartInstance = new Chart(trendCanvas, {
-                        type: 'line',
-                        data: {
-                            labels: trendData.trend.map(t => t.month),
-                            datasets: [{
-                                label: 'Revenue ($)',
-                                data: trendData.trend.map(t => t.revenue),
-                                borderColor: '#FF6B6B',
-                                backgroundColor: 'rgba(255,107,107,0.15)',
-                                fill: true,
-                                tension: 0.4,
-                                pointRadius: 4,
-                                pointBackgroundColor: '#FF6B6B'
-                            }]
-                        },
-                        options: {
-                            responsive: true, maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: {
-                                    callbacks: {
-                                        afterLabel: (ctx) => {
-                                            const g = trendData.trend[ctx.dataIndex].growth_pct;
-                                            return g !== null ? `Growth: ${g > 0 ? '+' : ''}${g}%` : '';
-                                        }
-                                    }
-                                }
-                            },
-                            scales: {
-                                y: { ticks: { color: '#b3b3b3' }, grid: { color: '#282828' } },
-                                x: { ticks: { color: '#b3b3b3' }, grid: { color: '#282828' } }
-                            }
-                        }
-                    });
-                }
-
-                // --- Revenue by Genre (Horizontal Bar Funnel) ---
-                const genreFunnelCanvas = document.getElementById('genreFunnelChart');
-                if (genreFunnelCanvas && genreFunnelData.genres?.length) {
-                    const topGenres = genreFunnelData.genres.slice(0, 8);
-                    new Chart(genreFunnelCanvas, {
-                        type: 'bar',
-                        data: {
-                            labels: topGenres.map(g => g.genre || 'Unknown'),
-                            datasets: [{
-                                label: 'Revenue ($)',
-                                data: topGenres.map(g => g.gross_revenue),
-                                backgroundColor: '#F7DC6F',
-                                borderRadius: 6
-                            }]
-                        },
-                        options: {
-                            indexAxis: 'y',
-                            responsive: true, maintainAspectRatio: false,
-                            plugins: { legend: { display: false } },
-                            scales: {
-                                y: { ticks: { color: '#b3b3b3', font: { size: 11 } }, grid: { color: '#282828' } },
-                                x: { ticks: { color: '#b3b3b3' }, grid: { color: '#282828' } }
-                            }
-                        }
-                    });
-                }
-
             } catch (error) {
                 console.error('Error loading dashboard:', error);
             }
         }
 
-        document.addEventListener('DOMContentLoaded', loadDashboard);
+        // --- Audio Player ---
+        const tracks = [
+            { title: 'Event Horizon', artist: 'Lyra Void', src: '/assets/audio/event_horizon.mp3', cover: '/assets/albums/1.png' },
+            { title: 'Neon Pulse',    artist: 'Neon Pulse', src: '/assets/audio/neon_pulse.mp3',    cover: '/assets/albums/2.png' },
+            { title: 'Frozen Circuit',artist: 'Frost Byte', src: '/assets/audio/frozen_circuit.mp3',cover: '/assets/albums/3.png' },
+            { title: 'Digital Rush',  artist: 'Velocity',   src: '/assets/audio/digital_rush.mp3',  cover: '/assets/albums/4.png' },
+            { title: 'Neon Nights',   artist: 'Echo Waves', src: '/assets/audio/neon_nights.mp3',   cover: '/assets/albums/5.png' },
+        ];
+
+        let currentTrack = 0;
+        let audio = new Audio();
+        let isPlaying = false;
+
+        function formatTime(s) {
+            if (isNaN(s)) return '0:00';
+            const m = Math.floor(s / 60);
+            return `${m}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+        }
+
+        function loadTrack(idx) {
+            const t = tracks[idx];
+            audio.src = t.src;
+            document.getElementById('playerTitle').textContent = t.title;
+            document.getElementById('playerArtist').textContent = t.artist;
+            const img = document.getElementById('playerCoverImg');
+            img.src = t.cover;
+            document.getElementById('progressBar').value = 0;
+            document.getElementById('progressBar').style.background = 'linear-gradient(to right, #FFD700 0%, #333 0%)';
+            document.getElementById('currentTime').textContent = '0:00';
+            document.getElementById('duration').textContent = '0:00';
+            document.querySelectorAll('.track-row').forEach((row, i) => {
+                row.style.backgroundColor = i === idx ? '#222' : '';
+                row.querySelector('.track-num').innerHTML = i === idx && isPlaying
+                    ? '<span style="color:#FFD700;font-size:16px;">▶</span>'
+                    : String(i + 1).padStart(2, '0');
+            });
+        }
+
+        function togglePlay() {
+            if (isPlaying) {
+                audio.pause();
+                isPlaying = false;
+                document.getElementById('playPauseBtn').innerHTML = '▶';
+                document.getElementById('playPauseBtn').classList.remove('play-pulse');
+                document.getElementById('vinylDisc').classList.remove('vinyl-spin');
+                const row = document.querySelectorAll('.track-row')[currentTrack];
+                if (row) row.querySelector('.track-num').textContent = String(currentTrack + 1).padStart(2, '0');
+            } else {
+                audio.play();
+                isPlaying = true;
+                document.getElementById('playPauseBtn').innerHTML = '⏸';
+                document.getElementById('playPauseBtn').classList.add('play-pulse');
+                document.getElementById('vinylDisc').classList.add('vinyl-spin');
+                const row = document.querySelectorAll('.track-row')[currentTrack];
+                if (row) row.querySelector('.track-num').innerHTML = '<span style="color:#FFD700;font-size:16px;">▶</span>';
+            }
+        }
+
+        function changeTrack(dir) {
+            currentTrack = (currentTrack + dir + tracks.length) % tracks.length;
+            loadTrack(currentTrack);
+            if (isPlaying) audio.play();
+        }
+
+        function seek(val) {
+            if (audio.duration) audio.currentTime = (val / 100) * audio.duration;
+        }
+
+        function buildTrackList() {
+            const list = document.getElementById('trackList');
+            tracks.forEach((t, i) => {
+                const row = document.createElement('div');
+                row.className = 'track-row';
+                row.style.cssText = 'display:flex;align-items:center;gap:16px;padding:14px 24px;cursor:pointer;transition:background 0.15s;' + (i < tracks.length - 1 ? 'border-bottom:1px solid #282828;' : '');
+                row.innerHTML = `
+                    <span class="track-num" style="font-size:12px;color:#b3b3b3;min-width:24px;text-align:center;font-variant-numeric:tabular-nums;">${String(i + 1).padStart(2, '0')}</span>
+                    <div style="width:44px;height:44px;border-radius:8px;overflow:hidden;background:#282828;flex-shrink:0;">
+                        <img src="${t.cover}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
+                    </div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;">${t.title}</div>
+                        <div style="font-size:12px;color:#b3b3b3;">${t.artist}</div>
+                    </div>
+                    <div style="font-size:12px;color:#555;">♪</div>
+                `;
+                row.addEventListener('click', () => {
+                    const wasPlaying = isPlaying;
+                    if (currentTrack === i && isPlaying) { togglePlay(); return; }
+                    currentTrack = i;
+                    loadTrack(i);
+                    isPlaying = false;
+                    togglePlay();
+                });
+                list.appendChild(row);
+            });
+        }
+
+        audio.addEventListener('timeupdate', () => {
+            if (audio.duration) {
+                const pct = (audio.currentTime / audio.duration) * 100;
+                const bar = document.getElementById('progressBar');
+                bar.value = pct;
+                bar.style.background = `linear-gradient(to right, #FFD700 ${pct}%, #333 ${pct}%)`;
+                document.getElementById('currentTime').textContent = formatTime(audio.currentTime);
+            }
+        });
+        audio.addEventListener('loadedmetadata', () => {
+            document.getElementById('duration').textContent = formatTime(audio.duration);
+        });
+        audio.addEventListener('ended', () => { changeTrack(1); audio.play(); });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDashboard();
+            buildTrackList();
+            loadTrack(0);
+        });
     </script>
 </body>
 </html>

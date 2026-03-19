@@ -226,6 +226,17 @@ def artists():
 def works():
     return FileResponse("frontend/works.html")
 
+@app.get("/analytics")
+def analytics():
+    return FileResponse("frontend/analytics.html")
+
+@app.get("/assets/audio/{filename}")
+def get_audio(filename: str):
+    audio_path = Path(__file__).parent.parent / "frontend" / "src" / "audio" / filename
+    if not audio_path.exists():
+        return Response(status_code=404)
+    return FileResponse(str(audio_path), media_type="audio/mpeg")
+
 @app.get("/assets/phobos_logo.png")
 def logo():
     return FileResponse("frontend/phobos_logo.png")
