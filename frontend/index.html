@@ -486,7 +486,7 @@
 
         async function loadDashboard() {
             try {
-                const [artistsRes, worksRes, revenueMonthRes, totRevRes, totUnitsRes, topArtistRes, releasesRes, platformRes, topWorksRes, trendRes, genreFunnelRes] = await Promise.all([
+                const [artistsRes, worksRes, revenueMonthRes, totRevRes, totUnitsRes, topArtistRes, releasesRes, platformRes, platformDetailRes, topWorksRes, trendRes, genreFunnelRes] = await Promise.all([
                     fetch('/api/artists'),
                     fetch('/api/works'),
                     fetch('/api/revenue/by-artist-month'),
@@ -495,6 +495,7 @@
                     fetch('/get_top_artist'),
                     fetch('/recent_releases?limit=3'),
                     fetch('/revenue_by_platform'),
+                    fetch('/revenue_by_platform_detail'),
                     fetch('/top_works?limit=5'),
                     fetch('/monthly_trend'),
                     fetch('/revenue_by_genre')
@@ -507,6 +508,7 @@
                 const topArtistData = await topArtistRes.json();
                 const releasesData = await releasesRes.json();
                 const platformData = await platformRes.json();
+                const platformDetailData = await platformDetailRes.json();
                 const topWorksData = await topWorksRes.json();
                 const trendData = await trendRes.json();
                 const genreFunnelData = await genreFunnelRes.json();
@@ -633,18 +635,16 @@
                     });
                     salesChartInstance.update();
 
-                    // Platform chart — filtra transazioni degli artisti nel genere
+                    // Platform chart — ricalcola con solo gli artisti del genere
                     if (platformChartInstance) {
                         const filteredPlatforms = {};
-                        platformData.platforms.forEach(p => { filteredPlatforms[p.platform] = 0; });
-                        revenueByMonth.forEach(item => {
-                            if (artistsInGenre.has(item.artist_name)) {
-                                // non abbiamo dati platform per artista, sfuma solo visivamente
+                        platformDetailData.detail.forEach(row => {
+                            if (artistsInGenre.has(row.artist_name)) {
+                                filteredPlatforms[row.platform] = (filteredPlatforms[row.platform] || 0) + row.revenue;
                             }
                         });
-                        // Sfuma barre non rilevanti visivamente (non abbiamo breakdown platform x genere)
-                        platformChartInstance.data.datasets[0].backgroundColor = platformData.platforms.map((_, i) =>
-                            ['#1DB954','#FF6B6B','#4ECDC4','#FFA07A','#BB8FCE'][i % 5]
+                        platformChartInstance.data.datasets[0].data = platformData.platforms.map(p =>
+                            filteredPlatforms[p.platform] || 0
                         );
                         platformChartInstance.update();
                     }
@@ -678,6 +678,11 @@
                         dataset.borderWidth = 2;
                     });
                     salesChartInstance.update();
+
+                    if (platformChartInstance) {
+                        platformChartInstance.data.datasets[0].data = platformData.platforms.map(p => p.revenue);
+                        platformChartInstance.update();
+                    }
 
                     if (topWorksChartInstance) {
                         topWorksChartInstance.data.datasets[0].backgroundColor = topWorksData.works.map(() => '#4ECDC4');

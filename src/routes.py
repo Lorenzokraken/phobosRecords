@@ -414,6 +414,23 @@ def revenue_by_platform(
     return {"platforms": [{"platform": r[0], "revenue": float(r[1])} for r in rows]}
 
 
+@router.get("/revenue_by_platform_detail")
+def revenue_by_platform_detail(db=Depends(get_db)):
+    """Revenue per piattaforma con breakdown per artista (usato per filtro genere)."""
+    cur = db.cursor()
+    cur.execute("""
+        SELECT t.platform, a.name AS artist_name, COALESCE(SUM(t.gross_rev), 0) AS revenue
+        FROM transactions t
+        JOIN works w ON t.work_id = w.work_id
+        JOIN artists a ON w.artist_id = a.artist_id
+        GROUP BY t.platform, a.name
+        ORDER BY t.platform, revenue DESC
+    """)
+    rows = cur.fetchall()
+    cur.close()
+    return {"detail": [{"platform": r[0], "artist_name": r[1], "revenue": float(r[2])} for r in rows]}
+
+
 @router.get("/top_works")
 def top_works(
     limit: int = Query(5, ge=1, le=20),
