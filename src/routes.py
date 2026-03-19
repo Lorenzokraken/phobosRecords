@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, HTTPException, Query, Depends
 from pydantic import BaseModel
 from datetime import datetime
@@ -5,6 +6,7 @@ from typing import Optional
 from .db import get_db
 
 router = APIRouter()
+logger = logging.getLogger("phobos.api")
 
 
 # --- Pydantic Models ---
@@ -42,6 +44,7 @@ def calculate_artist_revenue(
     db=Depends(get_db)
 ):
     """Revenue netta per artista (gross_rev * royalty_pct), con filtri opzionali."""
+    logger.info(f"GET /calculate_artist_revenue - artist_id={artist_id} year={year}")
     cur = db.cursor()
     conditions = []
     params = []
@@ -68,6 +71,7 @@ def calculate_artist_revenue(
 
     rows = cur.fetchall()
     cur.close()
+    logger.info(f"Returning revenue for {len(rows)} artists")
     return {
         "revenues": [
             {"artist_id": r[0], "artist_name": r[1], "revenue": float(r[2])}
@@ -82,6 +86,7 @@ def calculate_artist_monthly_revenue(
     db=Depends(get_db)
 ):
     """Revenue netta per artista per mese."""
+    logger.info(f"GET /calculate_artist_monthly_revenue - artist_id={artist_id}")
     cur = db.cursor()
     where = "WHERE t.purchase_month IS NOT NULL"
     params = []
@@ -117,6 +122,7 @@ def calculate_work_revenue(
     db=Depends(get_db)
 ):
     """Revenue lorda per opera, con filtro opzionale per work_id."""
+    logger.info(f"GET /calculate_work_revenue - work_id={work_id}")
     cur = db.cursor()
     where = ("WHERE w.work_id = %s" if work_id is not None else "")
     params = [work_id] if work_id is not None else []
@@ -184,6 +190,7 @@ def get_top_artist(
     db=Depends(get_db)
 ):
     """Artista con la revenue lorda più alta."""
+    logger.info(f"GET /get_top_artist - year={year}")
     cur = db.cursor()
     where = ("WHERE EXTRACT(YEAR FROM t.period) = %s" if year is not None else "")
     params = [year] if year is not None else []
@@ -215,6 +222,7 @@ def tot_revenue(
     db=Depends(get_db)
 ):
     """Revenue lorda totale, con filtro opzionale per anno."""
+    logger.info(f"GET /tot_revenue - year={year}")
     cur = db.cursor()
     where = ("WHERE EXTRACT(YEAR FROM period) = %s" if year is not None else "")
     params = [year] if year is not None else []
@@ -231,6 +239,7 @@ def tot_unit_sold(
     db=Depends(get_db)
 ):
     """Numero totale di transazioni (unità vendute), con filtro opzionale per anno."""
+    logger.info(f"GET /tot_unit_sold - year={year}")
     cur = db.cursor()
     where = ("WHERE EXTRACT(YEAR FROM period) = %s" if year is not None else "")
     params = [year] if year is not None else []
@@ -360,6 +369,7 @@ def get_artist(
 @router.post("/create_artist")
 def create_artist(artist: ArtistCreate, db=Depends(get_db)):
     """Crea un nuovo artista nel database."""
+    logger.info(f"POST /create_artist - name={artist.artist_name}")
     cur = db.cursor()
     try:
         cur.execute("""
@@ -385,6 +395,7 @@ def create_artist(artist: ArtistCreate, db=Depends(get_db)):
 @router.post("/create_work")
 def create_work(work: WorkCreate, db=Depends(get_db)):
     """Crea una nuova opera nel database."""
+    logger.info(f"POST /create_work - title={work.title} artist_id={work.artist_id}")
     cur = db.cursor()
     try:
         cur.execute("""

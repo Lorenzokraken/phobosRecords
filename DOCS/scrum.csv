@@ -18,26 +18,26 @@ Data enrichment + validation,✅,py,Medium,Must,🟢,2,✅2312,data/*.json+trans
 README.md,IN PROGRESS,md,Low,Must,🟡,1,✅2312,README.md,10%,Documentazione GitHub
 requirements.txt,IN PROGRESS,py,Low,Must,🟢,0.5,✅2312,requirements.txt,10%,Dipendenze Python
 TIER 2: ADVANCED FEATURES (IN PROGRESS)
-Setup API FastAPI,,py,High,Must,🟢,3,,api.py,0%,requirements.txt+base
-API: /calculate_artist_revenue,,py,Medium,Must,🟢,2,,api.py,0%,Revenue totale artista
-API: /calculate_artist_monthly_revenue,,py,Medium,Must,🟡,2,,api.py,0%,Revenue mensile artista
-API: /calculate_work_revenue,,py,Medium,Must,🟡,2,,api.py,0%,Revenue per opera
-API: /get_top_artist,,py,Low,Must,🟡,1,,api.py,0%,Artisti top
-API: /tot_revenue,,py,Low,Must,🟢,1,,api.py,0%,Revenue totale
-API: /tot_unit_sold,,py,Low,Must,🟡,1,,api.py,0%,Unità vendute
-API: /get_works,,py,Low,Must,🟢,1,,api.py,0%,Lista opere
-API: /get_artist,,py,Low,Must,🟢,1,,api.py,0%,Lista artisti
-API: /create_work,,py,Medium,Must,🟡,2,,api.py,0%,Crea opera
-API: /create_artist,,py,Medium,Must,🟡,2,,api.py,0%,Crea artista
-Logging API,,py,Low,Must,🟡,1,,api.py,0%,File: api.log
-Test API endpoint,,py,Medium,Must,🟢,2,,test.py,0%,Test tutte le API
+Setup API FastAPI,✅,py,High,Must,🟢,3,✅1903,src/main.py+routes.py,100%,FastAPI+router+Pydantic models
+API: /calculate_artist_revenue,✅,py,Medium,Must,🟢,2,✅1903,src/routes.py,100%,Revenue netta per artista
+API: /calculate_artist_monthly_revenue,✅,py,Medium,Must,🟡,2,✅1903,src/routes.py,100%,Revenue mensile per artista
+API: /calculate_work_revenue,✅,py,Medium,Must,🟡,2,✅1903,src/routes.py,100%,Revenue lorda per opera
+API: /get_top_artist,✅,py,Low,Must,🟡,1,✅1903,src/routes.py,100%,Artista con revenue più alta
+API: /tot_revenue,✅,py,Low,Must,🟢,1,✅1903,src/routes.py,100%,Revenue lorda totale
+API: /tot_unit_sold,✅,py,Low,Must,🟡,1,✅1903,src/routes.py,100%,Conteggio transazioni
+API: /get_works,✅,py,Low,Must,🟢,1,✅1903,src/routes.py,100%,Lista opere da DB
+API: /get_artist,✅,py,Low,Must,🟢,1,✅1903,src/routes.py,100%,Lista artisti da DB
+API: /create_work,✅,py,Medium,Must,🟡,2,✅1903,src/routes.py+works.html,100%,Crea opera + modal frontend
+API: /create_artist,✅,py,Medium,Must,🟡,2,✅1903,src/routes.py+artists.html,100%,Crea artista + modal frontend
+Logging API,✅,py,Low,Must,🟡,1,✅1903,src/main.py+routes.py,100%,api.log + logger phobos.api su tutti gli endpoint
+Test API endpoint,✅,py,Medium,Must,🟢,2,✅1903,tests/test_api.py,100%,13 test (5 senza DB + 8 integration con marker)
 CI/CD Pipeline,,DevOps,High,Must,🔴,4,,GitHub Actions,0%,Push to prod
 NICE TO HAVE (Future)
-Immagini reali,,,Low,Nice,🟡,1,,frontend/,0%,Sostituire placeholder
-Pagination dinamica,,js,Medium,Nice,🟡,3,,artist.html+works.html,0%,Fetch da API
-Form artisti con API,,js,High,Nice,🟡,4,,artist.html,0%,Submit a /create_artist
-Form opere con API,,js,High,Nice,🟡,4,,works.html,0%,Submit a /create_work
-Dashboard con API,,js,Medium,Nice,🟡,4,,index.html,0%,Metriche reali
+Immagini reali,✅,,Low,Nice,🟡,1,✅1903,frontend/src/,100%,Immagini locali artists+albums
+Pagination dinamica,,js,Medium,Nice,🟡,3,,artist.html+works.html,0%,Attualmente statica
+Form artisti con API,✅,js,High,Nice,🟡,4,✅1903,artists.html,100%,Modal + upload immagine + POST
+Form opere con API,✅,js,High,Nice,🟡,4,✅1903,works.html,100%,Modal + upload cover + POST
+Dashboard con API,,js,Medium,Nice,🟡,4,,frontend/index.html,0%,Metriche reali
 Login utenti,,py,High,Nice,🔴,8,,auth.py,0%,Cofounder+manager
 OUT OF SCOPE
 Dashboard con grafici,,js,High,Out,🔴,12,,frontend/,0%,Chart.js

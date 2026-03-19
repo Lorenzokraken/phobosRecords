@@ -1,11 +1,27 @@
 from operator import index
 import json
+import logging
+import os
 
-from fastapi import FastAPI, HTTPException, Query, Depends
+from fastapi import FastAPI, HTTPException, Query, Depends, UploadFile, File
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
 from pathlib import Path
 from .db import connect_db
+import shutil
+import uuid
+
+# API Logger
+os.makedirs('logs', exist_ok=True)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('logs/api.log'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger("phobos.api")
 
 # Transparent 1x1 PNG placeholder
 PLACEHOLDER_PNG = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82'
@@ -44,16 +60,21 @@ class Work(BaseModel):
 @app.get("/api/artists")
 def list_artists():
     """Get all artists"""
+    logger.info("GET /api/artists")
     try:
         with open("data/artists.json", "r") as f:
             data = json.load(f)
-            return {"artists": data.get("artists", [])}
+            artists = data.get("artists", [])
+            logger.info(f"Returning {len(artists)} artists")
+            return {"artists": artists}
     except Exception as e:
+        logger.error(f"GET /api/artists failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/artists")
 def create_artist(artist: Artist):
     """Create a new artist"""
+    logger.info(f"POST /api/artists - name={artist.artist_name}")
     try:
         with open("data/artists.json", "r") as f:
             data = json.load(f)
@@ -64,23 +85,30 @@ def create_artist(artist: Artist):
         with open("data/artists.json", "w") as f:
             json.dump(data, f, indent=2)
 
+        logger.info(f"Artist created: {artist.artist_name}")
         return {"status": "success", "artist": new_artist}
     except Exception as e:
+        logger.error(f"POST /api/artists failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/works")
 def list_works():
     """Get all works"""
+    logger.info("GET /api/works")
     try:
         with open("data/works.json", "r") as f:
             data = json.load(f)
-            return {"works": data.get("works", [])}
+            works = data.get("works", [])
+            logger.info(f"Returning {len(works)} works")
+            return {"works": works}
     except Exception as e:
+        logger.error(f"GET /api/works failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/works")
 def create_work(work: Work):
     """Create a new work"""
+    logger.info(f"POST /api/works - title={work.title}")
     try:
         with open("data/works.json", "r") as f:
             data = json.load(f)
@@ -91,8 +119,10 @@ def create_work(work: Work):
         with open("data/works.json", "w") as f:
             json.dump(data, f, indent=2)
 
+        logger.info(f"Work created: {work.title}")
         return {"status": "success", "work": new_work}
     except Exception as e:
+        logger.error(f"POST /api/works failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 def get_db():
@@ -105,18 +135,20 @@ def get_db():
 
 @app.get("/health")
 def health():
+    logger.info("GET /health")
     return {"status" : "OK", "version":"0.0.1"}
 
 @app.get("/artist/{artist_id}")
 def get_artist(artist_id: str):
+    logger.info(f"GET /artist/{artist_id}")
     conn = connect_db()
     cur = conn.cursor()
     cur.execute("SELECT name FROM artists WHERE artist_id = %s", (artist_id))
     artist = cur.fetchone()
     cur.close()
     if not artist:
+        logger.warning(f"Artist {artist_id} not found")
         raise HTTPException(404, "artist not found")
-    
     return {"artist_id" : artist_id, "name" : artist[0]}
 
 
@@ -124,6 +156,7 @@ def get_artist(artist_id: str):
 def get_revenue(artist_id: int = Query(..., ge=1),
                 year: int = Query(2025, ge=2020),
                 db = Depends(get_db)):
+    logger.info(f"GET /revenue - artist_id={artist_id} year={year}")
     cur = db.cursor()
     cur.execute("""SELECT COALESCE (SUM(t.gross_rev), 0)
                 FROM transactions t
@@ -131,11 +164,13 @@ def get_revenue(artist_id: int = Query(..., ge=1),
                 WHERE w.artist_id = %s AND EXTRACT(YEAR FROM t.period) = %s""",(artist_id, year))
     total = cur.fetchone()[0] or 0
     cur.close()
+    logger.info(f"Revenue for artist {artist_id} year {year}: {total}")
     return {"artist_id":artist_id, "year":year, "total_revenue":total}
 
 @app.get("/api/revenue/by-artist")
 def get_revenue_by_artist(db = Depends(get_db)):
     """Get total revenue for each artist"""
+    logger.info("GET /api/revenue/by-artist")
     cur = db.cursor()
     cur.execute("""
         SELECT a.artist_id, a.name, COALESCE(SUM(t.gross_rev), 0) as total_revenue
@@ -147,7 +182,7 @@ def get_revenue_by_artist(db = Depends(get_db)):
     """)
     results = cur.fetchall()
     cur.close()
-
+    logger.info(f"Returning revenue for {len(results)} artists")
     return {
         "revenues": [
             {"artist_id": r[0], "artist_name": r[1], "total_revenue": float(r[2])}
@@ -158,6 +193,7 @@ def get_revenue_by_artist(db = Depends(get_db)):
 @app.get("/api/revenue/by-artist-month")
 def get_revenue_by_artist_month(db = Depends(get_db)):
     """Get revenue for each artist per month"""
+    logger.info("GET /api/revenue/by-artist-month")
     cur = db.cursor()
     cur.execute("""
         SELECT a.artist_id, a.name, t.purchase_month, COALESCE(SUM(t.gross_rev), 0) as monthly_revenue
@@ -170,7 +206,7 @@ def get_revenue_by_artist_month(db = Depends(get_db)):
     """)
     results = cur.fetchall()
     cur.close()
-
+    logger.info(f"Returning {len(results)} monthly revenue records")
     return {
         "revenues": [
             {"artist_id": r[0], "artist_name": r[1], "month": r[2], "revenue": float(r[3])}
@@ -215,6 +251,28 @@ def get_album_image(filename: str):
     if not image_path.exists():
         return Response(status_code=204)
     return FileResponse(str(image_path))
+
+@app.post("/api/upload/artist-image")
+async def upload_artist_image(file: UploadFile = File(...)):
+    logger.info(f"POST /api/upload/artist-image - file={file.filename}")
+    file_ext = file.filename.rsplit('.', 1)[-1].lower()
+    file_name = f"artist_{uuid.uuid4().hex[:8]}.{file_ext}"
+    file_path = Path(__file__).parent.parent / "frontend" / "src" / "artists" / file_name
+    with open(file_path, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+    logger.info(f"Artist image saved: {file_name}")
+    return {"filename": file_name}
+
+@app.post("/api/upload/work-cover")
+async def upload_work_cover(file: UploadFile = File(...)):
+    logger.info(f"POST /api/upload/work-cover - file={file.filename}")
+    file_ext = file.filename.rsplit('.', 1)[-1].lower()
+    file_name = f"cover_{uuid.uuid4().hex[:8]}.{file_ext}"
+    file_path = Path(__file__).parent.parent / "frontend" / "src" / "albums" / file_name
+    with open(file_path, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+    logger.info(f"Work cover saved: {file_name}")
+    return {"filename": file_name}
 
 
 
