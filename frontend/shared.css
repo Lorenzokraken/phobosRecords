@@ -426,8 +426,8 @@ input[type="date"]:focus {
     }
 
     .nav-menu a {
-        padding: 6px 12px;
-        font-size: 12px;
+        padding: 6px 10px;
+        font-size: 11px;
     }
 
     .main {

@@ -306,6 +306,12 @@
                 width: 100%;
                 justify-content: center;
                 flex-wrap: wrap;
+                gap: 4px;
+            }
+
+            .nav-menu a {
+                padding: 6px 10px;
+                font-size: 11px;
             }
         }
     </style>
@@ -421,7 +427,7 @@
         <!-- Featured Tracks -->
         <div style="margin-top: 40px; margin-bottom: 40px;">
             <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 20px; letter-spacing: -0.5px;">Featured Tracks</h2>
-            <div style="display: grid; grid-template-columns: 300px 1fr; gap: 24px; align-items: stretch;">
+            <div id="playerGrid" style="display: grid; grid-template-columns: 300px 1fr; gap: 24px; align-items: stretch;">
 
                 <!-- Left: Now Playing Card -->
                 <div id="nowPlayingCard" style="background: linear-gradient(160deg, #1c1c1c 0%, #141414 60%, #1a1a1a 100%); border-radius: 20px; padding: 24px; border: 1px solid rgba(255,215,0,0.12); position: relative; overflow: hidden; display:flex; flex-direction:column; justify-content:space-between;">
@@ -481,6 +487,12 @@
             .track-row:hover { background-color: #1e1e1e !important; }
             .vinyl-spin { animation: spin 3s linear infinite; }
             .play-pulse { animation: pulse 1.5s ease-in-out infinite; }
+            @media (max-width: 768px) {
+                #playerGrid { grid-template-columns: 1fr !important; }
+                #nowPlayingCard { flex-direction: row !important; align-items: center !important; gap: 16px !important; padding: 16px !important; }
+                #artworkWrap { max-height: 80px !important; width: 80px !important; flex-shrink: 0; }
+                #vinylDisc { display: none !important; }
+            }
         </style>
     </div>
 
