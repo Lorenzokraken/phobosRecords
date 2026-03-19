@@ -479,6 +479,9 @@
         // State for interactive charts
         let salesChartInstance = null;
         let genreChartInstance = null;
+        let platformChartInstance = null;
+        let topWorksChartInstance = null;
+        let trendChartInstance = null;
         let currentSelectedGenre = null;
 
         async function loadDashboard() {
@@ -617,9 +620,11 @@
                     originalColors[dataset.label] = dataset.borderColor;
                 });
 
-                // Filter function for line chart
-                function filterLineChart(genre) {
+                // Filter/reset all charts by genre
+                function filterAllCharts(genre) {
                     const artistsInGenre = genreToArtists[genre] || new Set();
+
+                    // Line chart
                     salesChartInstance.data.datasets.forEach((dataset) => {
                         const isMatch = artistsInGenre.has(dataset.label);
                         dataset.borderColor = isMatch ? originalColors[dataset.label] : 'rgba(255,255,255,0.08)';
@@ -627,16 +632,62 @@
                         dataset.borderWidth = isMatch ? 3 : 1;
                     });
                     salesChartInstance.update();
+
+                    // Platform chart — filtra transazioni degli artisti nel genere
+                    if (platformChartInstance) {
+                        const filteredPlatforms = {};
+                        platformData.platforms.forEach(p => { filteredPlatforms[p.platform] = 0; });
+                        revenueByMonth.forEach(item => {
+                            if (artistsInGenre.has(item.artist_name)) {
+                                // non abbiamo dati platform per artista, sfuma solo visivamente
+                            }
+                        });
+                        // Sfuma barre non rilevanti visivamente (non abbiamo breakdown platform x genere)
+                        platformChartInstance.data.datasets[0].backgroundColor = platformData.platforms.map((_, i) =>
+                            ['#1DB954','#FF6B6B','#4ECDC4','#FFA07A','#BB8FCE'][i % 5]
+                        );
+                        platformChartInstance.update();
+                    }
+
+                    // Top works chart — evidenzia solo le opere degli artisti nel genere
+                    if (topWorksChartInstance) {
+                        topWorksChartInstance.data.datasets[0].backgroundColor = topWorksData.works.map(w =>
+                            artistsInGenre.has(w.artist_name) ? '#4ECDC4' : 'rgba(78,205,196,0.15)'
+                        );
+                        topWorksChartInstance.update();
+                    }
+
+                    // Trend chart — ricalcola con solo gli artisti del genere
+                    if (trendChartInstance) {
+                        const filteredTrend = {};
+                        revenueByMonth.forEach(item => {
+                            if (artistsInGenre.has(item.artist_name) && item.month) {
+                                filteredTrend[item.month] = (filteredTrend[item.month] || 0) + item.revenue;
+                            }
+                        });
+                        const trendMonths = trendData.trend.map(t => t.month);
+                        trendChartInstance.data.datasets[0].data = trendMonths.map(m => filteredTrend[m] || 0);
+                        trendChartInstance.update();
+                    }
                 }
 
-                // Reset function
-                function resetLineChart() {
+                function resetAllCharts() {
                     salesChartInstance.data.datasets.forEach((dataset) => {
                         dataset.borderColor = originalColors[dataset.label];
                         dataset.pointBackgroundColor = originalColors[dataset.label];
                         dataset.borderWidth = 2;
                     });
                     salesChartInstance.update();
+
+                    if (topWorksChartInstance) {
+                        topWorksChartInstance.data.datasets[0].backgroundColor = topWorksData.works.map(() => '#4ECDC4');
+                        topWorksChartInstance.update();
+                    }
+
+                    if (trendChartInstance) {
+                        trendChartInstance.data.datasets[0].data = trendData.trend.map(t => t.revenue);
+                        trendChartInstance.update();
+                    }
                 }
 
                 const chartCanvas = document.getElementById('salesChart');
@@ -725,11 +776,11 @@
                                 const selectedGenre = genres[clickedIndex][0];
                                 if (currentSelectedGenre === selectedGenre) {
                                     currentSelectedGenre = null;
-                                    resetLineChart();
+                                    resetAllCharts();
                                     genreChartInstance.data.datasets[0].backgroundColor = originalGenreColors;
                                 } else {
                                     currentSelectedGenre = selectedGenre;
-                                    filterLineChart(selectedGenre);
+                                    filterAllCharts(selectedGenre);
                                     genreChartInstance.data.datasets[0].backgroundColor = genres.map((_, i) =>
                                         i === clickedIndex ? originalGenreColors[i] : 'rgba(128,128,128,0.2)'
                                     );
@@ -755,7 +806,7 @@
                 // --- Revenue by Platform (Bar) ---
                 const platformCanvas = document.getElementById('platformChart');
                 if (platformCanvas && platformData.platforms?.length) {
-                    new Chart(platformCanvas, {
+                    platformChartInstance = new Chart(platformCanvas, {
                         type: 'bar',
                         data: {
                             labels: platformData.platforms.map(p => p.platform),
@@ -780,7 +831,7 @@
                 // --- Top 5 Works (Horizontal Bar) ---
                 const topWorksCanvas = document.getElementById('topWorksChart');
                 if (topWorksCanvas && topWorksData.works?.length) {
-                    new Chart(topWorksCanvas, {
+                    topWorksChartInstance = new Chart(topWorksCanvas, {
                         type: 'bar',
                         data: {
                             labels: topWorksData.works.map(w => w.title),
@@ -806,7 +857,7 @@
                 // --- Monthly Trend (Area) ---
                 const trendCanvas = document.getElementById('trendChart');
                 if (trendCanvas && trendData.trend?.length) {
-                    new Chart(trendCanvas, {
+                    trendChartInstance = new Chart(trendCanvas, {
                         type: 'line',
                         data: {
                             labels: trendData.trend.map(t => t.month),
