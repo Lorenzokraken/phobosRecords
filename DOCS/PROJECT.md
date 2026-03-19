@@ -142,3 +142,33 @@ phobos-mvp/
 - **Revenue sources**: Streaming, Live, Merch, Sync
 - **Immagini**: Artisti e opere con URL esterni
 - **Frequenza**: Calcolo real-time all'insert (no batch settimanale)
+
+
+
+
+
+
+
+Test API endpoint	❌ Mancante
+CI/CD Pipeline	❌ Mancante
+NICE TO HAVE
+Task	Stato
+Pagination dinamica	❌ (statica)
+Form artisti con API	✅ Fatto — modal + POST /api/artists + upload immagine
+Form opere con API	✅ Fatto — modal + POST /api/works + upload cover
+Dashboard con API	❌
+
+Il pattern più semplice da studiare è GET /tot_revenue in src/routes.py:212:
+
+
+@router.get("/tot_revenue")
+def tot_revenue(year: Optional[int] = Query(None), db=Depends(get_db)):
+    logger.info(f"GET /tot_revenue - year={year}")   # ← log ingresso con parametro
+    cur = db.cursor()
+    where = ("WHERE EXTRACT(YEAR FROM period) = %s" if year is not None else "")
+    params = [year] if year is not None else []
+    cur.execute(f"SELECT COALESCE(SUM(gross_rev), 0) FROM transactions {where}", params)
+    total = float(cur.fetchone()[0])
+    cur.close()
+    return {"total_revenue": total, "year": year or "all"}
+Mostra tutto il pattern API in ~10 righe: parametro opzionale, query SQL, log, risposta JSON. Niente errori da gestire perché non può fallire su dati vuoti (COALESCE).

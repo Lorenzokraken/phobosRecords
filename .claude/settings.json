@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(py -3.13 -m pytest tests/test_api.py -v -m \"not integration\")",
+      "Bash(py -3.13 -m pytest tests/test_api.py -v)",
+      "Bash(railway service:*)"
+    ]
+  }
+}

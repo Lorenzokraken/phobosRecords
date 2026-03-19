@@ -99,7 +99,7 @@
         <template id="artistCardTemplate">
             <div class="artist-card">
                 <div class="artist-image">
-                    <img src="" alt="" class="artist-avatar">
+                    <img src="#" alt="" class="artist-avatar">
                 </div>
                 <div class="artist-info">
                     <h3 class="artist-name"></h3>
@@ -133,19 +133,51 @@
                         <label for="artistName">Artist Name *</label>
                         <input type="text" id="artistName" name="artistName" required>
                     </div>
-                    
+
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="royaltyPct">Royalty Percentage (%) *</label>
-                            <input type="number" id="royaltyPct" name="royaltyPct" min="0" max="100" step="0.01" required>
+                            <label for="mainGenre">Main Genre *</label>
+                            <input type="text" id="mainGenre" name="mainGenre" placeholder="e.g. Techno" required>
                         </div>
-                        
                         <div class="form-group">
-                            <label for="advancedPaid">Advanced Paid ($)</label>
-                            <input type="number" id="advancedPaid" name="advancedPaid" min="0" step="0.01">
+                            <label for="workType">Work Type</label>
+                            <select id="workType" name="workType">
+                                <option value="Album">Album</option>
+                                <option value="Single">Single</option>
+                                <option value="EP">EP</option>
+                                <option value="Mixtape">Mixtape</option>
+                            </select>
                         </div>
                     </div>
-                    
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="royaltyPct">Royalty (%) *</label>
+                            <input type="number" id="royaltyPct" name="royaltyPct" min="0" max="100" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="advancedPaid">Advance Paid ($)</label>
+                            <input type="number" id="advancedPaid" name="advancedPaid" min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label for="advancePending">Advance Pending ($)</label>
+                            <input type="number" id="advancePending" name="advancePending" min="0" step="0.01">
+                        </div>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="isFrontArtist" name="isFrontArtist">
+                        <label for="isFrontArtist">Front Artist</label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="artistImage">Artist Image</label>
+                        <input type="file" id="artistImage" name="artistImage" accept="image/png,image/jpeg,image/webp">
+                        <div class="image-preview" id="artistImagePreview">
+                            <span class="image-preview-placeholder">No image selected</span>
+                        </div>
+                    </div>
+
                     <div class="form-actions">
                         <button type="submit" class="submit-btn">Add Artist</button>
                         <button type="button" id="cancelFormBtn" class="reset-btn">Cancel</button>
@@ -216,14 +248,44 @@
         // Setup modal
         setupModal('artistModal', 'toggleFormBtn', 'closeModal', 'cancelFormBtn');
 
+        // Image preview
+        document.getElementById('artistImage').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('artistImagePreview');
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    preview.innerHTML = `<img src="${ev.target.result}" style="border-radius:50%;width:100px;height:100px;object-fit:cover;">`;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.innerHTML = '<span class="image-preview-placeholder">No image selected</span>';
+            }
+        });
+
         // Form submission handling
         document.getElementById('artistForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
+            let imageName = '';
+            const imageFile = document.getElementById('artistImage').files[0];
+            if (imageFile) {
+                const fd = new FormData();
+                fd.append('file', imageFile);
+                const uploadRes = await fetch('/api/upload/artist-image', { method: 'POST', body: fd });
+                const uploadData = await uploadRes.json();
+                imageName = uploadData.filename;
+            }
+
             const formData = {
                 artist_name: document.getElementById('artistName').value,
                 royalty_pct: parseFloat(document.getElementById('royaltyPct').value),
-                advanced_paid: parseFloat(document.getElementById('advancedPaid').value) || 0
+                advanced_paid: parseFloat(document.getElementById('advancedPaid').value) || 0,
+                advance_pending: parseFloat(document.getElementById('advancePending').value) || 0,
+                is_front_artist: document.getElementById('isFrontArtist').checked,
+                main_genre: document.getElementById('mainGenre').value,
+                work_type: document.getElementById('workType').value,
+                artist_image: imageName
             };
 
             try {
@@ -234,9 +296,9 @@
                 });
 
                 if (response.ok) {
-                    const result = await response.json();
                     alert(`Artist "${formData.artist_name}" added successfully!`);
                     this.reset();
+                    document.getElementById('artistImagePreview').innerHTML = '<span class="image-preview-placeholder">No image selected</span>';
                     document.getElementById('artistModal').style.display = 'none';
                     setTimeout(() => location.reload(), 500);
                 } else {

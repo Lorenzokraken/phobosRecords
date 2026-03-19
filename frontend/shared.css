@@ -270,6 +270,93 @@ select:focus {
     background-color: #333333;
 }
 
+/* File input */
+input[type="file"] {
+    width: 100%;
+    padding: 10px 14px;
+    background-color: #282828;
+    border: 1px dashed #555555;
+    border-radius: 4px;
+    color: #b3b3b3;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+input[type="file"]::file-selector-button {
+    background-color: #FFD700;
+    color: #000;
+    padding: 6px 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-right: 12px;
+}
+
+input[type="date"] {
+    width: 100%;
+    padding: 12px 16px;
+    background-color: #282828;
+    border: 1px solid #333333;
+    border-radius: 4px;
+    color: #ffffff;
+    font-size: 16px;
+    color-scheme: dark;
+}
+
+input[type="date"]:focus {
+    outline: none;
+    border-color: #FFD700;
+}
+
+/* Image preview area */
+.image-preview {
+    margin-top: 10px;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #1a1a1a;
+    border-radius: 4px;
+    overflow: hidden;
+    padding: 8px;
+}
+
+.image-preview img {
+    max-width: 100%;
+    max-height: 180px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+.image-preview-placeholder {
+    color: #555;
+    font-size: 13px;
+}
+
+/* Checkbox */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    margin-bottom: 20px;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #FFD700;
+    cursor: pointer;
+}
+
+.checkbox-group label {
+    margin: 0;
+    cursor: pointer;
+    color: #ffffff;
+    font-size: 15px;
+}
+
 /* Pagination */
 .pagination {
     display: flex;
