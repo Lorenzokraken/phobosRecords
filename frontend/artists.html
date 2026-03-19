@@ -92,6 +92,13 @@
             <button id="toggleFormBtn" class="toggle-form-btn">Add Artist</button>
         </div>
 
+        <div style="display:flex; gap:12px; margin-bottom:24px; flex-wrap:wrap; align-items:center;">
+            <input type="text" id="artistSearch" placeholder="Search artist..." style="background:#181818;border:1px solid #333;border-radius:8px;padding:10px 16px;color:#fff;font-size:14px;flex:1;min-width:200px;outline:none;">
+            <select id="genreFilter" style="background:#181818;border:1px solid #333;border-radius:8px;padding:10px 16px;color:#b3b3b3;font-size:14px;outline:none;cursor:pointer;">
+                <option value="">All Genres</option>
+            </select>
+        </div>
+
         <div class="artists-grid" id="artistsGrid">
                 <!-- Artists loaded dynamically from API -->
         </div>
@@ -195,48 +202,62 @@
             return colors[Math.floor(Math.random() * colors.length)];
         }
 
-        // Load artists from API
+        let allArtists = [];
+
+        function renderArtists(artists) {
+            const grid = document.getElementById('artistsGrid');
+            const template = document.getElementById('artistCardTemplate');
+            grid.innerHTML = '';
+            artists.forEach((artist, index) => {
+                const clone = template.content.cloneNode(true);
+                const img = clone.querySelector('img');
+                clone.querySelector('.artist-name').textContent = artist.artist_name;
+                clone.querySelector('.artist-genre').textContent = artist.main_genre;
+                clone.querySelector('.artist-stats').textContent = `Royalty: ${(artist.royalty_pct * 100).toFixed(1)}%`;
+                clone.querySelector('.artist-description').textContent = artist.work_type;
+                const imageId = index + 1;
+                img.onload = () => { img.style.display = 'block'; clone.querySelector('.artist-image').style.backgroundColor = 'transparent'; };
+                img.onerror = () => {
+                    img.style.display = 'none';
+                    const div = clone.querySelector('.artist-image');
+                    div.style.backgroundColor = getRandomColor();
+                    div.style.width = '100px'; div.style.height = '100px'; div.style.borderRadius = '50%';
+                };
+                img.src = `/assets/artists/${imageId}.png`;
+                img.alt = artist.artist_name;
+                grid.appendChild(clone);
+            });
+        }
+
+        function applyFilters() {
+            const q = document.getElementById('artistSearch').value.toLowerCase();
+            const genre = document.getElementById('genreFilter').value;
+            const filtered = allArtists.filter(a =>
+                (!q || a.artist_name.toLowerCase().includes(q)) &&
+                (!genre || a.main_genre === genre)
+            );
+            renderArtists(filtered);
+        }
+
         async function loadArtists() {
             try {
                 const response = await fetch('/api/artists');
                 const data = await response.json();
-                const grid = document.getElementById('artistsGrid');
-                const template = document.getElementById('artistCardTemplate');
+                allArtists = data.artists;
 
-                grid.innerHTML = ''; // Clear existing
-
-                data.artists.forEach((artist, index) => {
-                    const clone = template.content.cloneNode(true);
-                    const card = clone.querySelector('.artist-card');
-                    const img = clone.querySelector('img');
-
-                    clone.querySelector('.artist-name').textContent = artist.artist_name;
-                    clone.querySelector('.artist-genre').textContent = artist.main_genre;
-                    clone.querySelector('.artist-stats').textContent = `Royalty: ${(artist.royalty_pct * 100).toFixed(1)}%`;
-                    clone.querySelector('.artist-description').textContent = artist.work_type;
-
-                    // Use index+1 as ID for image naming (1.png, 2.png, etc)
-                    const imageId = index + 1;
-                    const imagePath = `/assets/artists/${imageId}.png`;
-
-                    // Try to load image, show random color if not found
-                    img.onload = () => {
-                        img.style.display = 'block';
-                        clone.querySelector('.artist-image').style.backgroundColor = 'transparent';
-                    };
-                    img.onerror = () => {
-                        img.style.display = 'none';
-                        clone.querySelector('.artist-image').style.backgroundColor = getRandomColor();
-                        clone.querySelector('.artist-image').style.width = '100px';
-                        clone.querySelector('.artist-image').style.height = '100px';
-                        clone.querySelector('.artist-image').style.borderRadius = '50%';
-                    };
-
-                    img.src = imagePath;
-                    img.alt = artist.artist_name;
-
-                    grid.appendChild(clone);
+                // Populate genre filter
+                const genres = [...new Set(allArtists.map(a => a.main_genre).filter(Boolean))].sort();
+                const select = document.getElementById('genreFilter');
+                genres.forEach(g => {
+                    const opt = document.createElement('option');
+                    opt.value = g; opt.textContent = g;
+                    select.appendChild(opt);
                 });
+
+                renderArtists(allArtists);
+
+                document.getElementById('artistSearch').addEventListener('input', applyFilters);
+                document.getElementById('genreFilter').addEventListener('change', applyFilters);
             } catch (error) {
                 console.error('Error loading artists:', error);
             }

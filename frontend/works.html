@@ -106,6 +106,13 @@
             <button id="toggleWorkFormBtn" class="toggle-form-btn">Add Work</button>
         </div>
 
+        <div style="display:flex; gap:12px; margin-bottom:24px; flex-wrap:wrap; align-items:center;">
+            <input type="text" id="workSearch" placeholder="Search title or artist..." style="background:#181818;border:1px solid #333;border-radius:8px;padding:10px 16px;color:#fff;font-size:14px;flex:1;min-width:200px;outline:none;">
+            <select id="genreFilter" style="background:#181818;border:1px solid #333;border-radius:8px;padding:10px 16px;color:#b3b3b3;font-size:14px;outline:none;cursor:pointer;">
+                <option value="">All Genres</option>
+            </select>
+        </div>
+
         <div class="songs-list" id="worksList">
                 <!-- Works loaded dynamically from API -->
         </div>
@@ -215,60 +222,65 @@
             return colors[Math.floor(Math.random() * colors.length)];
         }
 
-        // Load works from API
+        let allWorks = [];
+
+        function renderWorks(works) {
+            const list = document.getElementById('worksList');
+            const template = document.getElementById('workItemTemplate');
+            list.innerHTML = '';
+            works.forEach((work, index) => {
+                const clone = template.content.cloneNode(true);
+                const img = clone.querySelector('img');
+                clone.querySelector('.work-title').textContent = work.title;
+                clone.querySelector('.song-number').textContent = String(index + 1).padStart(2, '0');
+                clone.querySelector('.song-artist').textContent = work.artist_name || 'Unknown';
+                clone.querySelector('.song-details').textContent =
+                    `${(work.genre || ['Unknown'])[0]} • ${work.duration || 0}s • ${work.bpm || 0} BPM`;
+                clone.querySelector('.streams').textContent = `${work.bpm || 0} BPM`;
+                clone.querySelector('.likes').textContent = `Key: ${work.key || 'N/A'}`;
+                const imageId = index + 1;
+                img.onload = () => { img.style.display = 'block'; clone.querySelector('.cover-art').style.backgroundColor = 'transparent'; };
+                img.onerror = () => {
+                    img.style.display = 'none';
+                    const div = clone.querySelector('.cover-art');
+                    div.style.backgroundColor = getRandomColor();
+                    div.style.width = '56px'; div.style.height = '56px';
+                };
+                img.src = `/assets/albums/${imageId}.png`;
+                img.alt = work.title;
+                list.appendChild(clone);
+            });
+        }
+
+        function applyFilters() {
+            const q = document.getElementById('workSearch').value.toLowerCase();
+            const genre = document.getElementById('genreFilter').value;
+            const filtered = allWorks.filter(w =>
+                (!q || w.title.toLowerCase().includes(q) || (w.artist_name || '').toLowerCase().includes(q)) &&
+                (!genre || (w.genre || []).includes(genre))
+            );
+            renderWorks(filtered);
+        }
+
         async function loadWorks() {
             try {
-                const [worksRes, artistsRes] = await Promise.all([
-                    fetch('/api/works'),
-                    fetch('/api/artists')
-                ]);
-                const worksData = await worksRes.json();
-                const artistsData = await artistsRes.json();
+                const res = await fetch('/api/works');
+                const data = await res.json();
+                allWorks = data.works;
 
-                // Create artist name map using array index as ID
-                const artistMap = {};
-                artistsData.artists.forEach((artist, index) => {
-                    artistMap[index] = artist.artist_name;
+                // Populate genre filter
+                const genres = [...new Set(allWorks.flatMap(w => w.genre || []).filter(Boolean))].sort();
+                const select = document.getElementById('genreFilter');
+                genres.forEach(g => {
+                    const opt = document.createElement('option');
+                    opt.value = g; opt.textContent = g;
+                    select.appendChild(opt);
                 });
 
-                const list = document.getElementById('worksList');
-                const template = document.getElementById('workItemTemplate');
+                renderWorks(allWorks);
 
-                list.innerHTML = ''; // Clear existing
-
-                worksData.works.forEach((work, index) => {
-                    const clone = template.content.cloneNode(true);
-                    const img = clone.querySelector('img');
-
-                    clone.querySelector('.work-title').textContent = work.title;
-                    clone.querySelector('.song-number').textContent = String(index + 1).padStart(2, '0');
-                    clone.querySelector('.song-artist').textContent = artistMap[work.artist_id] || `Unknown (${work.artist_id})`;
-                    clone.querySelector('.song-details').textContent =
-                        `${(work.genre || ['Unknown'])[0]} • ${work.duration_seconds}s • ${work.bpm} BPM`;
-                    clone.querySelector('.streams').textContent = `${work.bpm} BPM`;
-                    clone.querySelector('.likes').textContent = `Key: ${work.key || 'N/A'}`;
-
-                    // Use index+1 as ID for image naming (1.png, 2.png, etc)
-                    const imageId = index + 1;
-                    const imagePath = `/assets/albums/${imageId}.png`;
-
-                    // Try to load image, show random color if not found
-                    img.onload = () => {
-                        img.style.display = 'block';
-                        clone.querySelector('.cover-art').style.backgroundColor = 'transparent';
-                    };
-                    img.onerror = () => {
-                        img.style.display = 'none';
-                        clone.querySelector('.cover-art').style.backgroundColor = getRandomColor();
-                        clone.querySelector('.cover-art').style.width = '56px';
-                        clone.querySelector('.cover-art').style.height = '56px';
-                    };
-
-                    img.src = imagePath;
-                    img.alt = work.title;
-
-                    list.appendChild(clone);
-                });
+                document.getElementById('workSearch').addEventListener('input', applyFilters);
+                document.getElementById('genreFilter').addEventListener('change', applyFilters);
             } catch (error) {
                 console.error('Error loading works:', error);
             }
@@ -280,9 +292,9 @@
             const data = await res.json();
             const select = document.getElementById('artistSelect');
             select.innerHTML = '<option value="">Select an artist...</option>';
-            data.artists.forEach((artist, idx) => {
+            data.artists.forEach(artist => {
                 const opt = document.createElement('option');
-                opt.value = idx;
+                opt.value = artist.artist_id;
                 opt.textContent = artist.artist_name;
                 select.appendChild(opt);
             });
