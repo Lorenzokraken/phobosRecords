@@ -502,7 +502,7 @@
                     releaseIconDiv.style.fontSize = '0';
 
                     const img = document.createElement('img');
-                    img.src = `/assets/albums/${release.work_id}.png`;
+                    img.src = `/assets/albums/${idx + 1}.png`;
                     img.style.cssText = 'width:40px;height:40px;border-radius:4px;object-fit:cover;';
                     img.onerror = () => {
                         img.style.display = 'none';
