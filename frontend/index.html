@@ -347,7 +347,7 @@
                             <img id="playerCoverImg" src="/assets/albums/1.png" alt="" style="width:100%;height:100%;object-fit:cover;">
                         </div>
                         <!-- Spinning vinyl overlay when playing -->
-                        <div id="vinylDisc" style="position:absolute;bottom:-12px;right:-12px;width:64px;height:64px;border-radius:50%;background:radial-gradient(circle at 30% 30%, #444, #111);border:3px solid #FFD700;display:flex;align-items:center;justify-content:center;font-size:20px;transition:all 0.3s;box-shadow:0 4px 20px rgba(255,215,0,0.3);">🎵</div>
+                        <div id="vinylDisc" style="position:absolute;bottom:-12px;right:-12px;width:64px;height:64px;border-radius:50%;background:radial-gradient(circle at 30% 30%, #444, #111);border:3px solid #FFD700;display:flex;align-items:center;justify-content:center;transition:all 0.3s;box-shadow:0 4px 20px rgba(255,215,0,0.3);"><div style="width:12px;height:12px;border-radius:50%;background:#FFD700;"></div></div>
                     </div>
 
                     <!-- Track info -->
@@ -395,10 +395,30 @@
             .vinyl-spin { animation: spin 3s linear infinite; }
             .play-pulse { animation: pulse 1.5s ease-in-out infinite; }
             @media (max-width: 768px) {
-                #playerGrid { grid-template-columns: 1fr !important; }
-                #nowPlayingCard { flex-direction: row !important; align-items: center !important; gap: 16px !important; padding: 16px !important; }
-                #artworkWrap { max-height: 80px !important; width: 80px !important; flex-shrink: 0; }
+                #playerGrid {
+                    grid-template-columns: 1fr !important;
+                    grid-template-rows: auto auto !important;
+                }
+                #nowPlayingCard {
+                    order: 2;
+                    flex-direction: row !important;
+                    align-items: center !important;
+                    gap: 12px !important;
+                    padding: 12px 16px !important;
+                    border-radius: 12px !important;
+                }
+                #artworkWrap {
+                    width: 56px !important;
+                    height: 56px !important;
+                    max-height: 56px !important;
+                    flex-shrink: 0;
+                    border-radius: 8px !important;
+                }
                 #vinylDisc { display: none !important; }
+                #cardGlow { display: none !important; }
+                #nowPlayingCard > div:first-of-type { margin-bottom: 0 !important; }
+                #playerTitle { font-size: 14px !important; }
+                #playerArtist { font-size: 12px !important; }
             }
         </style>
     </div>
@@ -462,7 +482,7 @@
         let isPlaying = false;
 
         function formatTime(s) {
-            if (isNaN(s)) return '0:00';
+            if (!s || isNaN(s) || !isFinite(s) || s < 0) return '0:00';
             const m = Math.floor(s / 60);
             return `${m}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
         }
@@ -531,7 +551,7 @@
                         <div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;">${t.title}</div>
                         <div style="font-size:12px;color:#b3b3b3;">${t.artist}</div>
                     </div>
-                    <div style="font-size:12px;color:#555;">♪</div>
+                    <span class="track-duration" style="font-size:12px;color:#555;min-width:36px;text-align:right;"></span>
                 `;
                 row.addEventListener('click', () => {
                     const wasPlaying = isPlaying;
@@ -557,12 +577,28 @@
         audio.addEventListener('loadedmetadata', () => {
             document.getElementById('duration').textContent = formatTime(audio.duration);
         });
+
+        // Pre-load durations for track list
+        function loadTrackDurations() {
+            tracks.forEach((t, i) => {
+                const a = new Audio();
+                a.src = t.src;
+                a.addEventListener('loadedmetadata', () => {
+                    const rows = document.querySelectorAll('.track-row');
+                    if (rows[i]) {
+                        const span = rows[i].querySelector('.track-duration');
+                        if (span) span.textContent = formatTime(a.duration);
+                    }
+                });
+            });
+        }
         audio.addEventListener('ended', () => { changeTrack(1); audio.play(); });
 
         document.addEventListener('DOMContentLoaded', () => {
             loadDashboard();
             buildTrackList();
             loadTrack(0);
+            loadTrackDurations();
         });
     </script>
 </body>
