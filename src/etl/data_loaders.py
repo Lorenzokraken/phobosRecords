@@ -49,7 +49,7 @@ def load_artists(conn, loaded_at):
             loaded_at=loaded_at
         )
         db_id = insert_artist(conn, artist)
-        print(f"✓ Artista inserito: {a['artist_name']} (ID: {db_id})")
+        print(f"[OK] Artista inserito: {a['artist_name']} (ID: {db_id})")
 
 
 @log_operation
@@ -63,7 +63,7 @@ def load_works(conn, loaded_at):
         artist_name = artist_name_map[w['artist_id']]
         db_artist_id = get_artist_id(conn, artist_name)
         if not db_artist_id:
-            print(f"  ⚠ Artista non trovato in DB: {artist_name}, salto {w['title']}.")
+            print(f"  [SKIP] Artista non trovato in DB: {artist_name}, salto {w['title']}.")
             continue
         work = Work(
             artist_id=db_artist_id,
@@ -79,7 +79,7 @@ def load_works(conn, loaded_at):
             loaded_at=loaded_at
         )
         work_id = insert_work(conn, work)
-        print(f"  ✓ Opera inserita: {w['title']} (ID: {work_id})")
+        print(f"  [OK] Opera inserita: {w['title']} (ID: {work_id})")
 
 
 @log_operation
@@ -91,7 +91,7 @@ def load_transactions(conn, loaded_at, filepath="data/transaction.csv"):
             continue
         work_id = get_work_id(conn, row['TITOLO'])
         if not work_id:
-            print(f"  ⚠ Opera non trovata: {row['TITOLO']}, salto.")
+            print(f"  [WARN] Opera non trovata: {row['TITOLO']}, salto.")
             continue
         period = date.fromisoformat(row['MESE DI VENDITA'] + "-01")
         transaction = Transaction(
@@ -109,7 +109,7 @@ def load_transactions(conn, loaded_at, filepath="data/transaction.csv"):
             loaded_at=loaded_at
         )
         insert_transaction(conn, transaction)
-        print(f"    ✓ Transazione: {row['STORE']} - {row['TITOLO']} ({row['GUADAGNI (USD)']}$)")
+        print(f"    [OK] Transazione: {row['STORE']} - {row['TITOLO']} ({row['GUADAGNI (USD)']}$)")
 
 
 @log_operation
@@ -120,8 +120,8 @@ def load_quotas(conn, loaded_at):
     for w in works_data['works']:
         work_id = get_work_id(conn, w['title'])
         if not work_id:
-            print(f"  ⚠ Opera non trovata per quotas: {w['title']}, salto.")
+            print(f"  [WARN] Opera non trovata per quotas: {w['title']}, salto.")
             continue
         if w.get('quotas'):
             insert_quotas(conn, work_id, w['quotas'], loaded_at)
-            print(f"  ✓ Quotas inserite per opera: {w['title']}")
+            print(f"  [OK] Quotas inserite per opera: {w['title']}")
