@@ -260,8 +260,16 @@
 
         async function loadWorks() {
             try {
-                const res = await fetch('/api/works');
-                const data = await res.json();
+                const CACHE_KEY = 'phobos_works';
+                let data;
+                const cached = sessionStorage.getItem(CACHE_KEY);
+                if (cached) {
+                    data = JSON.parse(cached);
+                } else {
+                    const res = await fetch('/api/works');
+                    data = await res.json();
+                    sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
+                }
                 allWorks = data.works;
 
                 // Populate genre filter

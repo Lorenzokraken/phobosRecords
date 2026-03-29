@@ -115,22 +115,30 @@
 
         async function loadAnalytics() {
             try {
-                const [artistsRes, revenueMonthRes, platformRes, platformDetailRes, topWorksRes, trendRes, genreFunnelRes] = await Promise.all([
-                    fetch('/api/artists'),
-                    fetch('/api/revenue/by-artist-month'),
-                    fetch('/revenue_by_platform'),
-                    fetch('/revenue_by_platform_detail'),
-                    fetch('/top_works?limit=5'),
-                    fetch('/monthly_trend'),
-                    fetch('/revenue_by_genre')
-                ]);
-                const artistsData = await artistsRes.json();
-                const revenueMonthData = await revenueMonthRes.json();
-                const platformData = await platformRes.json();
-                const platformDetailData = await platformDetailRes.json();
-                const topWorksData = await topWorksRes.json();
-                const trendData = await trendRes.json();
-                const genreFunnelData = await genreFunnelRes.json();
+                const CACHE_KEY = 'phobos_analytics';
+                let artistsData, revenueMonthData, platformData, platformDetailData, topWorksData, trendData, genreFunnelData;
+                const cached = sessionStorage.getItem(CACHE_KEY);
+                if (cached) {
+                    ({ artistsData, revenueMonthData, platformData, platformDetailData, topWorksData, trendData, genreFunnelData } = JSON.parse(cached));
+                } else {
+                    const [artistsRes, revenueMonthRes, platformRes, platformDetailRes, topWorksRes, trendRes, genreFunnelRes] = await Promise.all([
+                        fetch('/api/artists'),
+                        fetch('/api/revenue/by-artist-month'),
+                        fetch('/revenue_by_platform'),
+                        fetch('/revenue_by_platform_detail'),
+                        fetch('/top_works?limit=5'),
+                        fetch('/monthly_trend'),
+                        fetch('/revenue_by_genre')
+                    ]);
+                    artistsData = await artistsRes.json();
+                    revenueMonthData = await revenueMonthRes.json();
+                    platformData = await platformRes.json();
+                    platformDetailData = await platformDetailRes.json();
+                    topWorksData = await topWorksRes.json();
+                    trendData = await trendRes.json();
+                    genreFunnelData = await genreFunnelRes.json();
+                    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ artistsData, revenueMonthData, platformData, platformDetailData, topWorksData, trendData, genreFunnelData }));
+                }
 
                 const artists = artistsData.artists;
                 const revenueByMonth = revenueMonthData.revenues;

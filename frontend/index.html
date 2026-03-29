@@ -254,20 +254,13 @@
                         </svg>
                     </div>
                 </div>
-                <div class="metric-value" data-metric="units">24,567</div>
+                <div class="metric-value skeleton-text" data-metric="units">—</div>
                 <div class="metric-label">Works</div>
-                <span class="metric-change positive">↑ 12.5% vs last month</span>
                 <div class="progress-container">
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 75%"></div>
-                    </div>
-                    <div class="progress-stats">
-                        <span>18,425</span>
-                        <span>Target: 25,000</span>
-                    </div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
                 </div>
             </div>
-            
+
             <div class="dashboard-card">
                 <div class="card-header">
                     <div class="card-title">Revenue</div>
@@ -278,20 +271,13 @@
                         </svg>
                     </div>
                 </div>
-                <div class="metric-value" data-metric="revenue">$124,567</div>
+                <div class="metric-value skeleton-text" data-metric="revenue">—</div>
                 <div class="metric-label">USD</div>
-                <span class="metric-change positive">↑ 8.3% vs last month</span>
                 <div class="progress-container">
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 65%; background-color: #FFD700;"></div>
-                    </div>
-                    <div class="progress-stats">
-                        <span>$81,000</span>
-                        <span>Target: $125,000</span>
-                    </div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:0%; background-color:#FFD700;"></div></div>
                 </div>
             </div>
-            
+
             <div class="dashboard-card">
                 <div class="card-header">
                     <div class="card-title">Top Artist</div>
@@ -301,18 +287,19 @@
                         </svg>
                     </div>
                 </div>
-                <div class="metric-value" data-metric="top-artist-streams">1.2M</div>
-                <div class="metric-label">Streams this month</div>
-                <span class="metric-change positive">↑ 24.7%</span>
+                <div class="metric-value skeleton-text" data-metric="top-artist-streams">—</div>
+                <div class="metric-label">Total Revenue</div>
                 <div class="artist-profile">
-                    <div class="artist-avatar">🎧</div>
+                    <div class="artist-avatar" style="background:linear-gradient(135deg,#FFD700,#FFA500);display:flex;align-items:center;justify-content:center;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="#000"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+                    </div>
                     <div class="artist-info">
-                        <h3 data-metric="top-artist-name">DJ Phobos</h3>
-                        <p data-metric="top-artist-genre">Electronic · House</p>
+                        <h3 data-metric="top-artist-name" class="skeleton-text">—</h3>
+                        <p data-metric="top-artist-genre" class="skeleton-text">—</p>
                     </div>
                 </div>
             </div>
-            
+
             <div class="dashboard-card">
                 <div class="card-header">
                     <div class="card-title">Recent Releases</div>
@@ -323,11 +310,9 @@
                         </svg>
                     </div>
                 </div>
-                <div class="metric-value">12</div>
-                <div class="metric-label">This month</div>
-                <span class="metric-change positive">↑ 3 more than last month</span>
-                <div class="release-list" data-metric="releases-list">
-                </div>
+                <div class="metric-value" data-metric="releases-count">—</div>
+                <div class="metric-label">Recent releases</div>
+                <div class="release-list" data-metric="releases-list"></div>
             </div>
         </div>
 
@@ -490,6 +475,8 @@
                 #trackListCard { margin-bottom: 80px; }
             }
             @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes shimmer { 0% { opacity: 0.4; } 50% { opacity: 0.8; } 100% { opacity: 0.4; } }
+        .skeleton-text { animation: shimmer 1.4s ease-in-out infinite; color: #444; }
         </style>
     </div>
 
@@ -497,24 +484,37 @@
         // --- KPI Loader ---
         async function loadDashboard() {
             try {
-                const [totRevRes, totUnitsRes, topArtistRes, releasesRes] = await Promise.all([
-                    fetch('/tot_revenue'),
-                    fetch('/tot_unit_sold'),
-                    fetch('/get_top_artist'),
-                    fetch('/recent_releases?limit=3')
-                ]);
-                const totRevData = await totRevRes.json();
-                const totUnitsData = await totUnitsRes.json();
-                const topArtistData = await topArtistRes.json();
-                const releasesData = await releasesRes.json();
+                const CACHE_KEY = 'phobos_dashboard';
+                let totRevData, totUnitsData, topArtistData, releasesData;
+                const cached = sessionStorage.getItem(CACHE_KEY);
+                if (cached) {
+                    ({ totRevData, totUnitsData, topArtistData, releasesData } = JSON.parse(cached));
+                } else {
+                    const [totRevRes, totUnitsRes, topArtistRes, releasesRes] = await Promise.all([
+                        fetch('/tot_revenue'),
+                        fetch('/tot_unit_sold'),
+                        fetch('/get_top_artist'),
+                        fetch('/recent_releases?limit=3')
+                    ]);
+                    totRevData = await totRevRes.json();
+                    totUnitsData = await totUnitsRes.json();
+                    topArtistData = await topArtistRes.json();
+                    releasesData = await releasesRes.json();
+                    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ totRevData, totUnitsData, topArtistData, releasesData }));
+                }
 
                 document.querySelector('.dashboard-header p').textContent =
                     `Last updated: ${new Date().toLocaleDateString('en-GB', {day: 'numeric', month: 'long', year: 'numeric'})}`;
-                document.querySelector('[data-metric="units"]').textContent = totUnitsData.total_units.toLocaleString();
-                document.querySelector('[data-metric="revenue"]').textContent = `$${totRevData.total_revenue.toLocaleString()}`;
-                document.querySelector('[data-metric="top-artist-name"]').textContent = topArtistData.artist_name || '—';
-                document.querySelector('[data-metric="top-artist-genre"]').textContent = topArtistData.main_genre || '—';
-                document.querySelector('[data-metric="top-artist-streams"]').textContent = `$${topArtistData.total_revenue?.toLocaleString() || 0}`;
+                const setMetric = (sel, val) => {
+                    const el = document.querySelector(sel);
+                    if (el) { el.textContent = val; el.classList.remove('skeleton-text'); }
+                };
+                setMetric('[data-metric="units"]', totUnitsData.total_units.toLocaleString());
+                setMetric('[data-metric="revenue"]', `$${Number(totRevData.total_revenue).toLocaleString(undefined, {maximumFractionDigits: 0})}`);
+                setMetric('[data-metric="top-artist-name"]', topArtistData.artist_name || '—');
+                setMetric('[data-metric="top-artist-genre"]', topArtistData.main_genre || '—');
+                setMetric('[data-metric="top-artist-streams"]', `$${Number(topArtistData.total_revenue || 0).toLocaleString(undefined, {maximumFractionDigits: 0})}`);
+                setMetric('[data-metric="releases-count"]', releasesData.releases.length);
 
                 const releaseList = document.querySelector('[data-metric="releases-list"]');
                 releaseList.innerHTML = '';

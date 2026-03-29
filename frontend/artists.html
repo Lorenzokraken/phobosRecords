@@ -272,8 +272,16 @@
 
         async function loadArtists() {
             try {
-                const response = await fetch('/api/artists');
-                const data = await response.json();
+                const CACHE_KEY = 'phobos_artists';
+                let data;
+                const cached = sessionStorage.getItem(CACHE_KEY);
+                if (cached) {
+                    data = JSON.parse(cached);
+                } else {
+                    const response = await fetch('/api/artists');
+                    data = await response.json();
+                    sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
+                }
                 allArtists = data.artists;
 
                 // Populate genre filter
