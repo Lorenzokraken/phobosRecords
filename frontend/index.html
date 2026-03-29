@@ -334,92 +334,162 @@
         <!-- Featured Tracks -->
         <div style="margin-top: 40px; margin-bottom: 40px;">
             <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 20px; letter-spacing: -0.5px;">Featured Tracks</h2>
-            <div id="playerGrid" style="display: grid; grid-template-columns: 300px 1fr; gap: 24px; align-items: stretch;">
-
-                <!-- Left: Now Playing Card -->
-                <div id="nowPlayingCard" style="background: linear-gradient(160deg, #1c1c1c 0%, #141414 60%, #1a1a1a 100%); border-radius: 20px; padding: 24px; border: 1px solid rgba(255,215,0,0.12); position: relative; overflow: hidden; display:flex; flex-direction:column; justify-content:space-between;">
-                    <!-- Glow bg -->
-                    <div id="cardGlow" style="position:absolute;top:-40px;left:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,215,0,0.08);filter:blur(40px);pointer-events:none;transition:all 0.8s;"></div>
-
-                    <!-- Artwork -->
-                    <div style="position:relative; margin-bottom: 16px;">
-                        <div id="artworkWrap" style="width:100%;aspect-ratio:1;max-height:180px;border-radius:14px;overflow:hidden;background:#282828;box-shadow:0 12px 40px rgba(0,0,0,0.6);transition:transform 0.3s;">
-                            <img id="playerCoverImg" src="/assets/albums/1.png" alt="" style="width:100%;height:100%;object-fit:cover;">
-                        </div>
-                        <!-- Spinning vinyl overlay when playing -->
-                        <div id="vinylDisc" style="position:absolute;bottom:-12px;right:-12px;width:64px;height:64px;border-radius:50%;background:radial-gradient(circle at 30% 30%, #444, #111);border:3px solid #FFD700;display:flex;align-items:center;justify-content:center;transition:all 0.3s;box-shadow:0 4px 20px rgba(255,215,0,0.3);"><div style="width:12px;height:12px;border-radius:50%;background:#FFD700;"></div></div>
-                    </div>
-
-                    <!-- Track info -->
-                    <div style="margin-bottom: 12px;">
-                        <div id="playerTitle" style="font-size:18px;font-weight:700;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
-                        <div id="playerArtist" style="font-size:13px;color:#b3b3b3;">—</div>
-                    </div>
-
-                    <!-- Progress -->
-                    <div style="margin-bottom: 12px;">
-                        <input id="progressBar" type="range" min="0" max="100" value="0"
-                            style="width:100%;height:4px;accent-color:#FFD700;cursor:pointer;background:linear-gradient(to right, #FFD700 0%, #333 0%);border-radius:2px;outline:none;-webkit-appearance:none;appearance:none;"
-                            oninput="seek(this.value)">
-                        <div style="display:flex;justify-content:space-between;margin-top:6px;">
-                            <span id="currentTime" style="font-size:11px;color:#b3b3b3;">0:00</span>
-                            <span id="duration" style="font-size:11px;color:#b3b3b3;">0:00</span>
-                        </div>
-                    </div>
-
-                    <!-- Controls -->
-                    <div style="display:flex;align-items:center;justify-content:center;gap:20px;">
-                        <button onclick="changeTrack(-1)" style="background:none;border:none;color:#b3b3b3;cursor:pointer;font-size:20px;padding:8px;border-radius:50%;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#b3b3b3'">⏮</button>
-                        <button id="playPauseBtn" onclick="togglePlay()"
-                            style="background:#FFD700;border:none;color:#000;cursor:pointer;width:52px;height:52px;border-radius:50%;font-size:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(255,215,0,0.4);transition:all 0.2s;font-weight:bold;">▶</button>
-                        <button onclick="changeTrack(1)" style="background:none;border:none;color:#b3b3b3;cursor:pointer;font-size:20px;padding:8px;border-radius:50%;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#b3b3b3'">⏭</button>
-                    </div>
-                </div>
-
-                <!-- Right: Track List -->
-                <div style="background-color:#181818;border-radius:20px;border:1px solid #282828;overflow:hidden;">
-                    <div style="padding:20px 24px 12px;border-bottom:1px solid #282828;">
-                        <span style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#b3b3b3;">Playlist</span>
-                    </div>
+            <div id="playerGrid">
+                <!-- Track List -->
+                <div id="trackListCard">
                     <div id="trackList"></div>
+                </div>
+                <!-- Now Playing Card -->
+                <div id="nowPlayingCard">
+                    <div id="cardGlow"></div>
+                    <div id="artworkWrap">
+                        <img id="playerCoverImg" src="/assets/albums/1.png" alt="">
+                    </div>
+                    <div id="trackInfo">
+                        <div id="playerTitle">—</div>
+                        <div id="playerArtist">—</div>
+                    </div>
+                    <div id="progressWrap">
+                        <input id="progressBar" type="range" min="0" max="100" value="0" oninput="seek(this.value)">
+                        <div id="timeRow">
+                            <span id="currentTime">0:00</span>
+                            <span id="duration">0:00</span>
+                        </div>
+                    </div>
+                    <div id="controls">
+                        <button class="ctrl-btn" onclick="changeTrack(-1)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+                        </button>
+                        <button id="playPauseBtn" class="play-btn" onclick="togglePlay()">
+                            <svg id="playIcon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                            <svg id="pauseIcon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                        </button>
+                        <button class="ctrl-btn" onclick="changeTrack(1)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zm2-8.14 5.02 3.64L8 17.14V9.86zM16 6h2v12h-2z"/></svg>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
         <style>
-            @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-            @keyframes pulse { 0%,100% { box-shadow: 0 0 20px rgba(255,215,0,0.4); } 50% { box-shadow: 0 0 35px rgba(255,215,0,0.7); } }
-            #progressBar::-webkit-slider-thumb { -webkit-appearance:none; width:12px; height:12px; border-radius:50%; background:#FFD700; cursor:pointer; }
-            #progressBar::-moz-range-thumb { width:12px; height:12px; border-radius:50%; background:#FFD700; cursor:pointer; border:none; }
-            .track-row:hover { background-color: #1e1e1e !important; }
-            .vinyl-spin { animation: spin 3s linear infinite; }
-            .play-pulse { animation: pulse 1.5s ease-in-out infinite; }
+            #playerGrid {
+                display: grid;
+                grid-template-columns: 1fr 280px;
+                gap: 20px;
+                align-items: start;
+            }
+            #trackListCard {
+                background: #181818;
+                border-radius: 16px;
+                border: 1px solid #282828;
+                overflow: hidden;
+            }
+            #nowPlayingCard {
+                background: linear-gradient(160deg, #1e1e1e 0%, #141414 100%);
+                border-radius: 16px;
+                border: 1px solid rgba(255,215,0,0.12);
+                padding: 20px;
+                position: relative;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+            }
+            #cardGlow {
+                position: absolute; top: -60px; left: -60px;
+                width: 220px; height: 220px; border-radius: 50%;
+                background: rgba(255,215,0,0.06);
+                filter: blur(50px); pointer-events: none;
+            }
+            #artworkWrap {
+                width: 100%; aspect-ratio: 1;
+                border-radius: 12px; overflow: hidden;
+                background: #282828;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            }
+            #artworkWrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+            #trackInfo { position: relative; }
+            #playerTitle { font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+            #playerArtist { font-size: 12px; color: #b3b3b3; }
+            #progressWrap { position: relative; }
+            #progressBar {
+                width: 100%; height: 4px; cursor: pointer;
+                background: linear-gradient(to right, #FFD700 0%, #333 0%);
+                border-radius: 2px; outline: none;
+                -webkit-appearance: none; appearance: none;
+                accent-color: #FFD700;
+            }
+            #progressBar::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #FFD700; cursor: pointer; }
+            #progressBar::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: #FFD700; border: none; cursor: pointer; }
+            #timeRow { display: flex; justify-content: space-between; margin-top: 5px; font-size: 11px; color: #777; }
+            #controls { display: flex; align-items: center; justify-content: center; gap: 16px; }
+            .ctrl-btn {
+                background: none; border: none; color: #b3b3b3; cursor: pointer;
+                padding: 8px; border-radius: 50%; transition: color 0.2s;
+                display: flex; align-items: center; justify-content: center;
+            }
+            .ctrl-btn:hover { color: #fff; }
+            .play-btn {
+                width: 48px; height: 48px; border-radius: 50%;
+                background: #FFD700; border: none; cursor: pointer; color: #000;
+                display: flex; align-items: center; justify-content: center;
+                box-shadow: 0 0 16px rgba(255,215,0,0.35);
+                transition: transform 0.15s, box-shadow 0.15s;
+            }
+            .play-btn:hover { transform: scale(1.06); box-shadow: 0 0 24px rgba(255,215,0,0.5); }
+            .track-row {
+                display: flex; align-items: center; gap: 14px;
+                padding: 12px 20px; cursor: pointer;
+                transition: background 0.15s; border-bottom: 1px solid #1e1e1e;
+            }
+            .track-row:last-child { border-bottom: none; }
+            .track-row:hover { background: #1e1e1e; }
+            .track-row.active { background: #222; }
+            .track-num { font-size: 12px; color: #777; min-width: 22px; text-align: center; font-variant-numeric: tabular-nums; }
+            .track-cover { width: 42px; height: 42px; border-radius: 6px; overflow: hidden; background: #282828; flex-shrink: 0; }
+            .track-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+            .track-meta { flex: 1; min-width: 0; }
+            .track-meta-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+            .track-meta-artist { font-size: 12px; color: #b3b3b3; }
+            .track-duration { font-size: 12px; color: #555; min-width: 36px; text-align: right; }
+
+            /* Mobile: Spotify bottom bar */
             @media (max-width: 768px) {
                 #playerGrid {
-                    grid-template-columns: 1fr !important;
-                    grid-template-rows: auto auto !important;
+                    grid-template-columns: 1fr;
                 }
                 #nowPlayingCard {
-                    order: 2;
-                    flex-direction: row !important;
-                    align-items: center !important;
-                    gap: 12px !important;
-                    padding: 12px 16px !important;
-                    border-radius: 12px !important;
+                    position: fixed;
+                    bottom: 0; left: 0; right: 0;
+                    border-radius: 0;
+                    border-top: 1px solid #282828;
+                    border-left: none; border-right: none; border-bottom: none;
+                    flex-direction: row;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 10px 16px;
+                    z-index: 200;
+                    background: #181818;
                 }
+                #cardGlow { display: none; }
                 #artworkWrap {
-                    width: 56px !important;
-                    height: 56px !important;
-                    max-height: 56px !important;
+                    width: 48px !important;
+                    height: 48px !important;
+                    aspect-ratio: unset;
                     flex-shrink: 0;
-                    border-radius: 8px !important;
+                    border-radius: 6px;
                 }
-                #vinylDisc { display: none !important; }
-                #cardGlow { display: none !important; }
-                #nowPlayingCard > div:first-of-type { margin-bottom: 0 !important; }
-                #playerTitle { font-size: 14px !important; }
-                #playerArtist { font-size: 12px !important; }
+                #trackInfo { flex: 1; min-width: 0; gap: 0; }
+                #playerTitle { font-size: 13px; margin-bottom: 2px; }
+                #playerArtist { font-size: 11px; }
+                #progressWrap { display: none; }
+                #controls { gap: 4px; }
+                .ctrl-btn { padding: 6px; }
+                .play-btn { width: 40px; height: 40px; }
+                #trackListCard { margin-bottom: 80px; }
             }
+            @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         </style>
     </div>
 
@@ -470,11 +540,11 @@
 
         // --- Audio Player ---
         const tracks = [
-            { title: 'Event Horizon', artist: 'Lyra Void', src: '/assets/audio/Event Horizon.mp3', cover: '/assets/albums/1.png' },
-            { title: 'Neon Pulse',    artist: 'Neon Pulse', src: '/assets/audio/Neon Pulse.mp3',    cover: '/assets/albums/2.png' },
             { title: 'Frozen Circuit',artist: 'Frost Byte', src: '/assets/audio/Frozen Circuit.mp3',cover: '/assets/albums/3.png' },
-            { title: 'Digital Rush',  artist: 'Velocity',   src: '/assets/audio/Digital Rush.mp3',  cover: '/assets/albums/4.png' },
-            { title: 'Neon Nights',   artist: 'Echo Waves', src: '/assets/audio/Neon Nights.mp3',   cover: '/assets/albums/5.png' },
+            { title: 'Event Horizon', artist: 'Lyra Void',  src: '/assets/audio/Event Horizon.mp3', cover: '/assets/albums/1.png' },
+            { title: 'Neon Pulse',    artist: 'Neon Pulse',  src: '/assets/audio/Neon Pulse.mp3',    cover: '/assets/albums/2.png' },
+            { title: 'Digital Rush',  artist: 'Velocity',    src: '/assets/audio/Digital Rush.mp3',  cover: '/assets/albums/4.png' },
+            { title: 'Neon Nights',   artist: 'Echo Waves',  src: '/assets/audio/Neon Nights.mp3',   cover: '/assets/albums/5.png' },
         ];
 
         let currentTrack = 0;
@@ -492,16 +562,15 @@
             audio.src = t.src;
             document.getElementById('playerTitle').textContent = t.title;
             document.getElementById('playerArtist').textContent = t.artist;
-            const img = document.getElementById('playerCoverImg');
-            img.src = t.cover;
+            document.getElementById('playerCoverImg').src = t.cover;
             document.getElementById('progressBar').value = 0;
             document.getElementById('progressBar').style.background = 'linear-gradient(to right, #FFD700 0%, #333 0%)';
             document.getElementById('currentTime').textContent = '0:00';
             document.getElementById('duration').textContent = '0:00';
             document.querySelectorAll('.track-row').forEach((row, i) => {
-                row.style.backgroundColor = i === idx ? '#222' : '';
+                row.classList.toggle('active', i === idx);
                 row.querySelector('.track-num').innerHTML = i === idx && isPlaying
-                    ? '<span style="color:#FFD700;font-size:16px;">▶</span>'
+                    ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="#FFD700"><path d="M8 5v14l11-7z"/></svg>'
                     : String(i + 1).padStart(2, '0');
             });
         }
@@ -510,19 +579,17 @@
             if (isPlaying) {
                 audio.pause();
                 isPlaying = false;
-                document.getElementById('playPauseBtn').innerHTML = '▶';
-                document.getElementById('playPauseBtn').classList.remove('play-pulse');
-                document.getElementById('vinylDisc').classList.remove('vinyl-spin');
+                document.getElementById('playIcon').style.display = '';
+                document.getElementById('pauseIcon').style.display = 'none';
                 const row = document.querySelectorAll('.track-row')[currentTrack];
-                if (row) row.querySelector('.track-num').textContent = String(currentTrack + 1).padStart(2, '0');
+                if (row) { row.querySelector('.track-num').innerHTML = String(currentTrack + 1).padStart(2, '0'); }
             } else {
                 audio.play();
                 isPlaying = true;
-                document.getElementById('playPauseBtn').innerHTML = '⏸';
-                document.getElementById('playPauseBtn').classList.add('play-pulse');
-                document.getElementById('vinylDisc').classList.add('vinyl-spin');
+                document.getElementById('playIcon').style.display = 'none';
+                document.getElementById('pauseIcon').style.display = '';
                 const row = document.querySelectorAll('.track-row')[currentTrack];
-                if (row) row.querySelector('.track-num').innerHTML = '<span style="color:#FFD700;font-size:16px;">▶</span>';
+                if (row) { row.querySelector('.track-num').innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="#FFD700"><path d="M8 5v14l11-7z"/></svg>'; }
             }
         }
 
@@ -541,20 +608,16 @@
             tracks.forEach((t, i) => {
                 const row = document.createElement('div');
                 row.className = 'track-row';
-                row.style.cssText = 'display:flex;align-items:center;gap:16px;padding:14px 24px;cursor:pointer;transition:background 0.15s;' + (i < tracks.length - 1 ? 'border-bottom:1px solid #282828;' : '');
                 row.innerHTML = `
-                    <span class="track-num" style="font-size:12px;color:#b3b3b3;min-width:24px;text-align:center;font-variant-numeric:tabular-nums;">${String(i + 1).padStart(2, '0')}</span>
-                    <div style="width:44px;height:44px;border-radius:8px;overflow:hidden;background:#282828;flex-shrink:0;">
-                        <img src="${t.cover}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
+                    <span class="track-num">${String(i + 1).padStart(2, '0')}</span>
+                    <div class="track-cover"><img src="${t.cover}" onerror="this.style.display='none'" alt=""></div>
+                    <div class="track-meta">
+                        <div class="track-meta-title">${t.title}</div>
+                        <div class="track-meta-artist">${t.artist}</div>
                     </div>
-                    <div style="flex:1;min-width:0;">
-                        <div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;">${t.title}</div>
-                        <div style="font-size:12px;color:#b3b3b3;">${t.artist}</div>
-                    </div>
-                    <span class="track-duration" style="font-size:12px;color:#555;min-width:36px;text-align:right;"></span>
+                    <span class="track-duration"></span>
                 `;
                 row.addEventListener('click', () => {
-                    const wasPlaying = isPlaying;
                     if (currentTrack === i && isPlaying) { togglePlay(); return; }
                     currentTrack = i;
                     loadTrack(i);
