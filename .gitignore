@@ -44,6 +44,9 @@ htmlcov/
 logs/
 *.log
 
+# Claude Code
+.claude/
+
 # Generated files
 frontend/src/**/generated_image_*
 .DS_Store

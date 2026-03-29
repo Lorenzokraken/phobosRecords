@@ -118,12 +118,7 @@
             </div>
         </template>
 
-        <div class="pagination">
-            <button class="pagination-btn active">1</button>
-            <button class="pagination-btn">2</button>
-            <button class="pagination-btn">3</button>
-            <button class="pagination-btn next">Next →</button>
-        </div>
+        <div class="pagination" id="pagination"></div>
     </main>
     
     <!-- Modal Dialog -->
@@ -204,19 +199,23 @@
         }
 
         let allArtists = [];
+        let filteredArtists = [];
+        let currentPage = 1;
+        const PAGE_SIZE = 9;
 
         function renderArtists(artists) {
             const grid = document.getElementById('artistsGrid');
             const template = document.getElementById('artistCardTemplate');
             grid.innerHTML = '';
-            artists.forEach((artist, index) => {
+            const start = (currentPage - 1) * PAGE_SIZE;
+            const page = artists.slice(start, start + PAGE_SIZE);
+            page.forEach((artist) => {
                 const clone = template.content.cloneNode(true);
                 const img = clone.querySelector('img');
                 clone.querySelector('.artist-name').textContent = artist.artist_name;
                 clone.querySelector('.artist-genre').textContent = artist.main_genre;
                 clone.querySelector('.artist-stats').textContent = `Royalty: ${(artist.royalty_pct * 100).toFixed(1)}%`;
                 clone.querySelector('.artist-description').textContent = artist.work_type;
-                const imageId = index + 1;
                 img.onload = () => { img.style.display = 'block'; clone.querySelector('.artist-image').style.backgroundColor = 'transparent'; };
                 img.onerror = () => {
                     img.style.display = 'none';
@@ -224,20 +223,51 @@
                     div.style.backgroundColor = getRandomColor();
                     div.style.width = '100px'; div.style.height = '100px'; div.style.borderRadius = '50%';
                 };
-                img.src = `/assets/artists/${imageId}.png`;
+                img.src = `/assets/artists/${artist.artist_id}.png`;
                 img.alt = artist.artist_name;
                 grid.appendChild(clone);
             });
+            renderPagination(artists.length);
+        }
+
+        function renderPagination(total) {
+            const container = document.getElementById('pagination');
+            const totalPages = Math.ceil(total / PAGE_SIZE);
+            container.innerHTML = '';
+            if (totalPages <= 1) return;
+
+            const prev = document.createElement('button');
+            prev.className = 'pagination-btn';
+            prev.textContent = '← Prev';
+            prev.disabled = currentPage === 1;
+            prev.onclick = () => { currentPage--; renderArtists(filteredArtists); };
+            container.appendChild(prev);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'pagination-btn' + (i === currentPage ? ' active' : '');
+                btn.textContent = i;
+                btn.onclick = () => { currentPage = i; renderArtists(filteredArtists); };
+                container.appendChild(btn);
+            }
+
+            const next = document.createElement('button');
+            next.className = 'pagination-btn';
+            next.textContent = 'Next →';
+            next.disabled = currentPage === totalPages;
+            next.onclick = () => { currentPage++; renderArtists(filteredArtists); };
+            container.appendChild(next);
         }
 
         function applyFilters() {
             const q = document.getElementById('artistSearch').value.toLowerCase();
             const genre = document.getElementById('genreFilter').value;
-            const filtered = allArtists.filter(a =>
+            filteredArtists = allArtists.filter(a =>
                 (!q || a.artist_name.toLowerCase().includes(q)) &&
                 (!genre || a.main_genre === genre)
             );
-            renderArtists(filtered);
+            currentPage = 1;
+            renderArtists(filteredArtists);
         }
 
         async function loadArtists() {

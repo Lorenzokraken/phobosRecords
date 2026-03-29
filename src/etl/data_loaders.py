@@ -115,6 +115,15 @@ def load_transactions(conn, loaded_at, filepath="data/transaction.csv"):
 @log_operation
 def load_quotas(conn, loaded_at):
     """Load royalty quotas (multi-artist splits) from works.json into DB."""
+    with open("data/artists.json", "r", encoding="utf-8") as f:
+        artists_data = json.load(f)
+    # Map JSON index (1-based) -> DB artist_id by name
+    json_id_to_db_id = {}
+    for i, a in enumerate(artists_data['artists']):
+        db_id = get_artist_id(conn, a['artist_name'])
+        if db_id:
+            json_id_to_db_id[i + 1] = db_id
+
     with open("data/works.json", "r", encoding="utf-8") as f:
         works_data = json.load(f)
     for w in works_data['works']:
@@ -123,5 +132,12 @@ def load_quotas(conn, loaded_at):
             print(f"  [WARN] Opera non trovata per quotas: {w['title']}, salto.")
             continue
         if w.get('quotas'):
-            insert_quotas(conn, work_id, w['quotas'], loaded_at)
-            print(f"  [OK] Quotas inserite per opera: {w['title']}")
+            # Remap artist_id from JSON index to real DB id
+            mapped_quotas = [
+                {'artist_id': json_id_to_db_id[q['artist_id']], 'quota_pct': q['quota_pct']}
+                for q in w['quotas']
+                if q['artist_id'] in json_id_to_db_id
+            ]
+            if mapped_quotas:
+                insert_quotas(conn, work_id, mapped_quotas, loaded_at)
+                print(f"  [OK] Quotas inserite per opera: {w['title']}")
