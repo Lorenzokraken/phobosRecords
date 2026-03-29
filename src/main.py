@@ -173,11 +173,9 @@ def get_revenue_by_artist(db = Depends(get_db)):
     logger.info("GET /api/revenue/by-artist")
     cur = db.cursor()
     cur.execute("""
-        SELECT a.artist_id, a.name, COALESCE(SUM(t.gross_rev), 0) as total_revenue
-        FROM artists a
-        LEFT JOIN works w ON a.artist_id = w.artist_id
-        LEFT JOIN transactions t ON w.work_id = t.work_id
-        GROUP BY a.artist_id, a.name
+        SELECT artist_id, artist_name, COALESCE(SUM(gross_rev), 0) AS total_revenue
+        FROM aggregated_royalties
+        GROUP BY artist_id, artist_name
         ORDER BY total_revenue DESC
     """)
     results = cur.fetchall()
@@ -196,13 +194,10 @@ def get_revenue_by_artist_month(db = Depends(get_db)):
     logger.info("GET /api/revenue/by-artist-month")
     cur = db.cursor()
     cur.execute("""
-        SELECT a.artist_id, a.name, t.purchase_month, COALESCE(SUM(t.gross_rev), 0) as monthly_revenue
-        FROM artists a
-        LEFT JOIN works w ON a.artist_id = w.artist_id
-        LEFT JOIN transactions t ON w.work_id = t.work_id
-        WHERE t.purchase_month IS NOT NULL
-        GROUP BY a.artist_id, a.name, t.purchase_month
-        ORDER BY a.artist_id, t.purchase_month
+        SELECT artist_id, artist_name, purchase_month, COALESCE(SUM(gross_rev), 0) AS monthly_revenue
+        FROM aggregated_royalties
+        GROUP BY artist_id, artist_name, purchase_month
+        ORDER BY artist_id, purchase_month
     """)
     results = cur.fetchall()
     cur.close()

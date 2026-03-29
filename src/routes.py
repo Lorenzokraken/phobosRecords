@@ -35,7 +35,19 @@ class WorkCreate(BaseModel):
     bpm: int = 0
 
 
-# --- Revenue Routes ---
+# --- Aggregation Refresh ---
+
+@router.post("/refresh_aggregates")
+def refresh_aggregates(db=Depends(get_db)):
+    """Full refresh of aggregated_royalties summary table."""
+    logger.info("POST /refresh_aggregates")
+    from .db import refresh_aggregated_royalties
+    rows = refresh_aggregated_royalties()
+    logger.info(f"Aggregated royalties refreshed: {rows} rows")
+    return {"status": "success", "rows_refreshed": rows, "refreshed_at": datetime.now().isoformat()}
+
+
+# --- Revenue Routes (read from aggregated_royalties) ---
 
 @router.get("/calculate_artist_revenue")
 def calculate_artist_revenue(
@@ -43,29 +55,27 @@ def calculate_artist_revenue(
     year: Optional[int] = Query(None),
     db=Depends(get_db)
 ):
-    """Revenue netta per artista (gross_rev * royalty_pct), con filtri opzionali."""
+    """Revenue netta per artista, con filtri opzionali."""
     logger.info(f"GET /calculate_artist_revenue - artist_id={artist_id} year={year}")
     cur = db.cursor()
     conditions = []
     params = []
 
     if artist_id is not None:
-        conditions.append("a.artist_id = %s")
+        conditions.append("artist_id = %s")
         params.append(artist_id)
     if year is not None:
-        conditions.append("EXTRACT(YEAR FROM t.period) = %s")
+        conditions.append("period_year = %s")
         params.append(year)
 
     where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
 
     cur.execute(f"""
-        SELECT a.artist_id, a.name,
-               COALESCE(SUM(t.gross_rev), 0) * a.royalty_pct AS revenue
-        FROM artists a
-        LEFT JOIN works w ON a.artist_id = w.artist_id
-        LEFT JOIN transactions t ON w.work_id = t.work_id
+        SELECT artist_id, artist_name,
+               SUM(gross_rev) * MAX(royalty_pct) AS revenue
+        FROM aggregated_royalties
         {where}
-        GROUP BY a.artist_id, a.name, a.royalty_pct
+        GROUP BY artist_id, artist_name
         ORDER BY revenue DESC
     """, params)
 
@@ -88,22 +98,22 @@ def calculate_artist_monthly_revenue(
     """Revenue netta per artista per mese."""
     logger.info(f"GET /calculate_artist_monthly_revenue - artist_id={artist_id}")
     cur = db.cursor()
-    where = "WHERE t.purchase_month IS NOT NULL"
+    conditions = []
     params = []
 
     if artist_id is not None:
-        where += " AND a.artist_id = %s"
+        conditions.append("artist_id = %s")
         params.append(artist_id)
 
+    where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
+
     cur.execute(f"""
-        SELECT a.artist_id, a.name, t.purchase_month,
-               COALESCE(SUM(t.gross_rev), 0) * a.royalty_pct AS revenue
-        FROM artists a
-        LEFT JOIN works w ON a.artist_id = w.artist_id
-        LEFT JOIN transactions t ON w.work_id = t.work_id
+        SELECT artist_id, artist_name, purchase_month,
+               SUM(gross_rev) * MAX(royalty_pct) AS revenue
+        FROM aggregated_royalties
         {where}
-        GROUP BY a.artist_id, a.name, a.royalty_pct, t.purchase_month
-        ORDER BY a.artist_id, t.purchase_month
+        GROUP BY artist_id, artist_name, purchase_month
+        ORDER BY artist_id, purchase_month
     """, params)
 
     rows = cur.fetchall()
@@ -124,17 +134,21 @@ def calculate_work_revenue(
     """Revenue lorda per opera, con filtro opzionale per work_id."""
     logger.info(f"GET /calculate_work_revenue - work_id={work_id}")
     cur = db.cursor()
-    where = ("WHERE w.work_id = %s" if work_id is not None else "")
-    params = [work_id] if work_id is not None else []
+    conditions = []
+    params = []
+
+    if work_id is not None:
+        conditions.append("work_id = %s")
+        params.append(work_id)
+
+    where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
 
     cur.execute(f"""
-        SELECT w.work_id, w.title, a.name AS artist_name,
-               COALESCE(SUM(t.gross_rev), 0) AS gross_revenue
-        FROM works w
-        JOIN artists a ON w.artist_id = a.artist_id
-        LEFT JOIN transactions t ON w.work_id = t.work_id
+        SELECT work_id, work_title, artist_name,
+               SUM(gross_rev) AS gross_revenue
+        FROM aggregated_royalties
         {where}
-        GROUP BY w.work_id, w.title, a.name
+        GROUP BY work_id, work_title, artist_name
         ORDER BY gross_revenue DESC
     """, params)
 
@@ -155,21 +169,22 @@ def calculate_work_monthly_revenue(
 ):
     """Revenue lorda per opera per mese."""
     cur = db.cursor()
-    where = "WHERE t.purchase_month IS NOT NULL"
+    conditions = []
     params = []
 
     if work_id is not None:
-        where += " AND w.work_id = %s"
+        conditions.append("work_id = %s")
         params.append(work_id)
 
+    where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
+
     cur.execute(f"""
-        SELECT w.work_id, w.title, t.purchase_month,
-               COALESCE(SUM(t.gross_rev), 0) AS revenue
-        FROM works w
-        LEFT JOIN transactions t ON w.work_id = t.work_id
+        SELECT work_id, work_title, purchase_month,
+               SUM(gross_rev) AS revenue
+        FROM aggregated_royalties
         {where}
-        GROUP BY w.work_id, w.title, t.purchase_month
-        ORDER BY w.work_id, t.purchase_month
+        GROUP BY work_id, work_title, purchase_month
+        ORDER BY work_id, purchase_month
     """, params)
 
     rows = cur.fetchall()
@@ -192,17 +207,15 @@ def get_top_artist(
     """Artista con la revenue lorda più alta."""
     logger.info(f"GET /get_top_artist - year={year}")
     cur = db.cursor()
-    where = ("WHERE EXTRACT(YEAR FROM t.period) = %s" if year is not None else "")
+    where = ("WHERE period_year = %s" if year is not None else "")
     params = [year] if year is not None else []
 
     cur.execute(f"""
-        SELECT a.artist_id, a.name, a.main_genre,
-               COALESCE(SUM(t.gross_rev), 0) AS total_revenue
-        FROM artists a
-        LEFT JOIN works w ON a.artist_id = w.artist_id
-        LEFT JOIN transactions t ON w.work_id = t.work_id
+        SELECT artist_id, artist_name, main_genre,
+               SUM(gross_rev) AS total_revenue
+        FROM aggregated_royalties
         {where}
-        GROUP BY a.artist_id, a.name, a.main_genre
+        GROUP BY artist_id, artist_name, main_genre
         ORDER BY total_revenue DESC
         LIMIT 1
     """, params)
@@ -224,10 +237,10 @@ def tot_revenue(
     """Revenue lorda totale, con filtro opzionale per anno."""
     logger.info(f"GET /tot_revenue - year={year}")
     cur = db.cursor()
-    where = ("WHERE EXTRACT(YEAR FROM period) = %s" if year is not None else "")
+    where = ("WHERE period_year = %s" if year is not None else "")
     params = [year] if year is not None else []
 
-    cur.execute(f"SELECT COALESCE(SUM(gross_rev), 0) FROM transactions {where}", params)
+    cur.execute(f"SELECT COALESCE(SUM(gross_rev), 0) FROM aggregated_royalties {where}", params)
     total = float(cur.fetchone()[0])
     cur.close()
     return {"total_revenue": total, "year": year or "all"}
@@ -238,31 +251,31 @@ def tot_unit_sold(
     year: Optional[int] = Query(None),
     db=Depends(get_db)
 ):
-    """Numero totale di transazioni (unità vendute), con filtro opzionale per anno."""
+    """Numero totale di unità vendute, con filtro opzionale per anno."""
     logger.info(f"GET /tot_unit_sold - year={year}")
     cur = db.cursor()
-    where = ("WHERE EXTRACT(YEAR FROM period) = %s" if year is not None else "")
+    where = ("WHERE period_year = %s" if year is not None else "")
     params = [year] if year is not None else []
 
-    cur.execute(f"SELECT COUNT(*) FROM transactions {where}", params)
-    total = cur.fetchone()[0]
+    cur.execute(f"SELECT COALESCE(SUM(units_sold), 0) FROM aggregated_royalties {where}", params)
+    total = int(cur.fetchone()[0])
     cur.close()
     return {"total_units": total, "year": year or "all"}
 
 
 @router.get("/total_yearly_listeners")
 def total_yearly_listeners(db=Depends(get_db)):
-    """Conteggio transazioni per anno (proxy per listeners)."""
+    """Conteggio unità vendute per anno (proxy per listeners)."""
     cur = db.cursor()
     cur.execute("""
-        SELECT EXTRACT(YEAR FROM period)::int AS year, COUNT(*) AS listeners
-        FROM transactions
-        GROUP BY year
-        ORDER BY year
+        SELECT period_year, SUM(units_sold) AS listeners
+        FROM aggregated_royalties
+        GROUP BY period_year
+        ORDER BY period_year
     """)
     rows = cur.fetchall()
     cur.close()
-    return {"listeners": [{"year": r[0], "count": r[1]} for r in rows]}
+    return {"listeners": [{"year": r[0], "count": int(r[1])} for r in rows]}
 
 
 # --- Works & Artists ---
@@ -397,14 +410,14 @@ def revenue_by_platform(
     year: Optional[int] = Query(None),
     db=Depends(get_db)
 ):
-    """Revenue lorda per piattaforma (Spotify, Deezer, ecc.)."""
+    """Revenue lorda per piattaforma."""
     logger.info(f"GET /revenue_by_platform - year={year}")
     cur = db.cursor()
-    where = ("WHERE EXTRACT(YEAR FROM period) = %s" if year is not None else "")
+    where = ("WHERE period_year = %s" if year is not None else "")
     params = [year] if year is not None else []
     cur.execute(f"""
         SELECT platform, COALESCE(SUM(gross_rev), 0) AS revenue
-        FROM transactions
+        FROM aggregated_royalties
         {where}
         GROUP BY platform
         ORDER BY revenue DESC
@@ -416,15 +429,13 @@ def revenue_by_platform(
 
 @router.get("/revenue_by_platform_detail")
 def revenue_by_platform_detail(db=Depends(get_db)):
-    """Revenue per piattaforma con breakdown per artista (usato per filtro genere)."""
+    """Revenue per piattaforma con breakdown per artista."""
     cur = db.cursor()
     cur.execute("""
-        SELECT t.platform, a.name AS artist_name, COALESCE(SUM(t.gross_rev), 0) AS revenue
-        FROM transactions t
-        JOIN works w ON t.work_id = w.work_id
-        JOIN artists a ON w.artist_id = a.artist_id
-        GROUP BY t.platform, a.name
-        ORDER BY t.platform, revenue DESC
+        SELECT platform, artist_name, COALESCE(SUM(gross_rev), 0) AS revenue
+        FROM aggregated_royalties
+        GROUP BY platform, artist_name
+        ORDER BY platform, revenue DESC
     """)
     rows = cur.fetchall()
     cur.close()
@@ -440,16 +451,14 @@ def top_works(
     """Top opere per revenue lorda."""
     logger.info(f"GET /top_works - limit={limit} year={year}")
     cur = db.cursor()
-    where = ("WHERE EXTRACT(YEAR FROM t.period) = %s" if year is not None else "")
+    where = ("WHERE period_year = %s" if year is not None else "")
     params = [year] if year is not None else []
     cur.execute(f"""
-        SELECT w.work_id, w.title, a.name AS artist_name,
-               COALESCE(SUM(t.gross_rev), 0) AS gross_revenue
-        FROM works w
-        JOIN artists a ON w.artist_id = a.artist_id
-        LEFT JOIN transactions t ON w.work_id = t.work_id
+        SELECT work_id, work_title, artist_name,
+               SUM(gross_rev) AS gross_revenue
+        FROM aggregated_royalties
         {where}
-        GROUP BY w.work_id, w.title, a.name
+        GROUP BY work_id, work_title, artist_name
         ORDER BY gross_revenue DESC
         LIMIT %s
     """, params + [limit])
@@ -465,8 +474,7 @@ def monthly_trend(db=Depends(get_db)):
     cur = db.cursor()
     cur.execute("""
         SELECT purchase_month, COALESCE(SUM(gross_rev), 0) AS revenue
-        FROM transactions
-        WHERE purchase_month IS NOT NULL
+        FROM aggregated_royalties
         GROUP BY purchase_month
         ORDER BY purchase_month
     """)
@@ -486,25 +494,23 @@ def revenue_by_genre(
     year: Optional[int] = Query(None),
     db=Depends(get_db)
 ):
-    """Revenue e unità vendute per genere (funnel)."""
+    """Revenue e unità vendute per genere."""
     logger.info(f"GET /revenue_by_genre - year={year}")
     cur = db.cursor()
-    where = ("WHERE EXTRACT(YEAR FROM t.period) = %s" if year is not None else "")
+    where = ("WHERE period_year = %s" if year is not None else "")
     params = [year] if year is not None else []
     cur.execute(f"""
-        SELECT a.main_genre,
-               COUNT(t.transaction_id) AS units_sold,
-               COALESCE(SUM(t.gross_rev), 0) AS gross_revenue
-        FROM artists a
-        LEFT JOIN works w ON a.artist_id = w.artist_id
-        LEFT JOIN transactions t ON w.work_id = t.work_id
+        SELECT main_genre,
+               SUM(units_sold) AS units_sold,
+               COALESCE(SUM(gross_rev), 0) AS gross_revenue
+        FROM aggregated_royalties
         {where}
-        GROUP BY a.main_genre
+        GROUP BY main_genre
         ORDER BY gross_revenue DESC
     """, params)
     rows = cur.fetchall()
     cur.close()
-    return {"genres": [{"genre": r[0], "units_sold": r[1], "gross_revenue": float(r[2])} for r in rows]}
+    return {"genres": [{"genre": r[0], "units_sold": int(r[1]), "gross_revenue": float(r[2])} for r in rows]}
 
 
 @router.post("/create_work")

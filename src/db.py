@@ -46,7 +46,7 @@ def truncate_tables():
     conn = connect_db()
     cur = conn.cursor()
     
-    # Tronca tutte le tabelle (inclusa quotas)
+    # Tronca tutte le tabelle (la materialized view aggregated_royalties si refresha separatamente)
     tables = ['transactions', 'works', 'artists']
     for table in tables:
         cur.execute(f"TRUNCATE TABLE {table} RESTART IDENTITY CASCADE;")
@@ -55,6 +55,29 @@ def truncate_tables():
     cur.close()
     conn.close()
     print("✓ Tables truncated successfully")
+
+def refresh_aggregated_royalties():
+    """Refresh the aggregated_royalties materialized view.
+    Uses CONCURRENTLY (non-blocking) if already populated, plain refresh on first run.
+    """
+    conn = connect_db()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT ispopulated FROM pg_matviews
+        WHERE matviewname = 'aggregated_royalties'
+    """)
+    already_populated = cur.fetchone()[0]
+    if already_populated:
+        cur.execute("REFRESH MATERIALIZED VIEW CONCURRENTLY aggregated_royalties")
+    else:
+        cur.execute("REFRESH MATERIALIZED VIEW aggregated_royalties")
+    conn.commit()
+    cur.execute("SELECT COUNT(*) FROM aggregated_royalties")
+    rows = cur.fetchone()[0]
+    cur.close()
+    conn.close()
+    return rows
+
 
 if __name__ == "__main__":
     truncate_tables()  # Cancella dati esistenti

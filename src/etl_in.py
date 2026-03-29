@@ -17,7 +17,10 @@ def main():
     load_transactions(conn, loaded_at)
     conn.commit()
     conn.close()
-    print("\n✓ Data saved successfully to database.")
+    print("\n[OK] Data saved successfully to database.")
+    from .db import refresh_aggregated_royalties
+    rows = refresh_aggregated_royalties()
+    print(f"[OK] Aggregated royalties refreshed: {rows} rows.")
 
 if __name__ == "__main__":
     main()

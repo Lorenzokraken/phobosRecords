@@ -52,3 +52,40 @@ CREATE TABLE IF NOT EXISTS quotas (
     loaded_at TIMESTAMP NOT NULL,
     UNIQUE(work_id, artist_id)
 );
+
+CREATE MATERIALIZED VIEW IF NOT EXISTS aggregated_royalties AS
+SELECT
+    a.artist_id,
+    a.name                                                              AS artist_name,
+    a.royalty_pct,
+    a.main_genre,
+    w.work_id,
+    w.title                                                             AS work_title,
+    t.purchase_month,
+    MAX(EXTRACT(YEAR FROM t.period)::INTEGER)                           AS period_year,
+    t.platform,
+    COALESCE(SUM(t.gross_rev), 0)                                       AS gross_rev,
+    COALESCE(SUM(t.gross_rev
+        - COALESCE(t.platform_fee, 0)
+        - COALESCE(t.distr_cost,  0)), 0)                               AS net_rev,
+    COALESCE(SUM(t.gross_rev
+        - COALESCE(t.platform_fee, 0)
+        - COALESCE(t.distr_cost,  0)), 0) * a.royalty_pct               AS royalty_earned,
+    COUNT(t.transaction_id)                                             AS units_sold
+FROM artists a
+JOIN works        w ON a.artist_id  = w.artist_id
+JOIN transactions t ON w.work_id    = t.work_id
+WHERE t.purchase_month IS NOT NULL
+GROUP BY
+    a.artist_id, a.name, a.royalty_pct, a.main_genre,
+    w.work_id,   w.title,
+    t.purchase_month, t.platform
+WITH NO DATA;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_agg_pk
+    ON aggregated_royalties(artist_id, work_id, purchase_month, platform);
+CREATE INDEX IF NOT EXISTS idx_agg_artist   ON aggregated_royalties(artist_id);
+CREATE INDEX IF NOT EXISTS idx_agg_year     ON aggregated_royalties(period_year);
+CREATE INDEX IF NOT EXISTS idx_agg_platform ON aggregated_royalties(platform);
+CREATE INDEX IF NOT EXISTS idx_agg_genre    ON aggregated_royalties(main_genre);
+CREATE INDEX IF NOT EXISTS idx_agg_work     ON aggregated_royalties(work_id);
