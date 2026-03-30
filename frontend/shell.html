@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phobos Records</title>
+    <link rel="stylesheet" href="/assets/shared.css">
+    <style>
+        html, body { height: 100%; overflow: hidden; }
+
+        .shell-layout {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .shell-content {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #pageFrame {
+            flex: 1;
+            border: none;
+            width: 100%;
+            height: 100%;
+            background: #0f0f0f;
+        }
+
+        /* Player bar */
+        #playerBar {
+            background: #141414;
+            border-top: 1px solid #282828;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 0 24px;
+            height: 80px;
+            flex-shrink: 0;
+            z-index: 200;
+        }
+
+        /* Track info (left) */
+        #pbTrackInfo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 240px;
+            flex-shrink: 0;
+        }
+        #pbCover {
+            width: 52px;
+            height: 52px;
+            border-radius: 6px;
+            object-fit: cover;
+            background: #282828;
+            flex-shrink: 0;
+        }
+        #pbTitle {
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        #pbArtist {
+            font-size: 12px;
+            color: #b3b3b3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Controls (center) */
+        #pbControls {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        #pbButtons {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .pb-ctrl-btn {
+            background: none;
+            border: none;
+            color: #b3b3b3;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.15s;
+        }
+        .pb-ctrl-btn:hover { color: #fff; }
+        .pb-play-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #FFD700;
+            border: none;
+            cursor: pointer;
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 12px rgba(255,215,0,0.3);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .pb-play-btn:hover { transform: scale(1.06); box-shadow: 0 0 20px rgba(255,215,0,0.5); }
+
+        #pbProgressWrap {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #pbProgress {
+            flex: 1;
+            height: 4px;
+            cursor: pointer;
+            background: linear-gradient(to right, #FFD700 0%, #333 0%);
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            accent-color: #FFD700;
+        }
+        #pbProgress::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #FFD700; cursor: pointer; }
+        #pbProgress::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: #FFD700; border: none; cursor: pointer; }
+        .pb-time { font-size: 11px; color: #777; min-width: 32px; }
+        #pbCurrentTime { text-align: right; }
+
+        /* Volume (right) */
+        #pbVolume {
+            width: 140px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        #pbVolumeIcon { color: #b3b3b3; }
+        #pbVolumeSlider {
+            flex: 1;
+            height: 4px;
+            cursor: pointer;
+            background: linear-gradient(to right, #b3b3b3 100%, #333 100%);
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            accent-color: #b3b3b3;
+        }
+        #pbVolumeSlider::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 10px; border-radius: 50%; background: #fff; cursor: pointer; }
+        #pbVolumeSlider::-moz-range-thumb { width: 10px; height: 10px; border-radius: 50%; background: #fff; border: none; cursor: pointer; }
+
+        @media (max-width: 768px) {
+            #playerBar {
+                padding: 0 12px;
+                gap: 10px;
+                height: 70px;
+            }
+            #pbTrackInfo { width: auto; flex: 1; min-width: 0; }
+            #pbControls { flex: none; }
+            #pbProgressWrap { display: none; }
+            #pbVolume { display: none; }
+            #pbButtons { gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell-layout">
+        <header class="top-bar">
+            <div class="logo-section">
+                <img src="/assets/phobos_logo.png" alt="Phobos Records Logo" class="logo">
+                <div class="brand-name">Phobos Records</div>
+            </div>
+            <nav>
+                <ul class="nav-menu">
+                    <li><a href="#" class="nav-link active" data-page="/">Home</a></li>
+                    <li><a href="#" class="nav-link" data-page="/artists">Artists</a></li>
+                    <li><a href="#" class="nav-link" data-page="/works">Works</a></li>
+                    <li><a href="#" class="nav-link" data-page="/analytics">Analytics</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <div class="shell-content">
+            <iframe id="pageFrame" src="/page/home" title="Content"></iframe>
+        </div>
+
+        <!-- Persistent Player Bar -->
+        <div id="playerBar">
+            <div id="pbTrackInfo">
+                <img id="pbCover" src="/assets/albums/3.png" alt="">
+                <div>
+                    <div id="pbTitle">Frozen Circuit</div>
+                    <div id="pbArtist">Frost Byte</div>
+                </div>
+            </div>
+
+            <div id="pbControls">
+                <div id="pbButtons">
+                    <button class="pb-ctrl-btn" onclick="pbChangeTrack(-1)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+                    </button>
+                    <button id="pbPlayBtn" class="pb-play-btn" onclick="pbTogglePlay()">
+                        <svg id="pbPlayIcon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        <svg id="pbPauseIcon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                    </button>
+                    <button class="pb-ctrl-btn" onclick="pbChangeTrack(1)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zm2-8.14 5.02 3.64L8 17.14V9.86zM16 6h2v12h-2z"/></svg>
+                    </button>
+                </div>
+                <div id="pbProgressWrap">
+                    <span class="pb-time" id="pbCurrentTime">0:00</span>
+                    <input id="pbProgress" type="range" min="0" max="100" value="0" oninput="pbSeek(this.value)">
+                    <span class="pb-time" id="pbDuration">0:00</span>
+                </div>
+            </div>
+
+            <div id="pbVolume">
+                <svg id="pbVolumeIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+                </svg>
+                <input id="pbVolumeSlider" type="range" min="0" max="100" value="100" oninput="pbSetVolume(this.value)">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tracks = [
+            { title: 'Frozen Circuit', artist: 'Frost Byte', src: '/assets/audio/Frozen Circuit.mp3', cover: '/assets/albums/3.png' },
+            { title: 'Event Horizon',  artist: 'Lyra Void',  src: '/assets/audio/Event Horizon.mp3',  cover: '/assets/albums/1.png' },
+            { title: 'Neon Pulse',     artist: 'Neon Pulse', src: '/assets/audio/Neon Pulse.mp3',     cover: '/assets/albums/2.png' },
+            { title: 'Digital Rush',   artist: 'Velocity',   src: '/assets/audio/Digital Rush.mp3',   cover: '/assets/albums/4.png' },
+            { title: 'Neon Nights',    artist: 'Echo Waves', src: '/assets/audio/Neon Nights.mp3',    cover: '/assets/albums/5.png' },
+        ];
+
+        let currentTrack = 0;
+        let isPlaying = false;
+        const audio = new Audio();
+        audio.src = tracks[0].src;
+
+        function formatTime(s) {
+            if (!s || isNaN(s) || !isFinite(s) || s < 0) return '0:00';
+            return `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+        }
+
+        function pbLoadTrack(idx) {
+            const t = tracks[idx];
+            audio.src = t.src;
+            document.getElementById('pbTitle').textContent = t.title;
+            document.getElementById('pbArtist').textContent = t.artist;
+            document.getElementById('pbCover').src = t.cover;
+            document.getElementById('pbProgress').value = 0;
+            document.getElementById('pbProgress').style.background = 'linear-gradient(to right, #FFD700 0%, #333 0%)';
+            document.getElementById('pbCurrentTime').textContent = '0:00';
+            document.getElementById('pbDuration').textContent = '0:00';
+        }
+
+        function pbTogglePlay() {
+            if (isPlaying) {
+                audio.pause();
+                isPlaying = false;
+                document.getElementById('pbPlayIcon').style.display = '';
+                document.getElementById('pbPauseIcon').style.display = 'none';
+            } else {
+                audio.play();
+                isPlaying = true;
+                document.getElementById('pbPlayIcon').style.display = 'none';
+                document.getElementById('pbPauseIcon').style.display = '';
+            }
+        }
+
+        function pbChangeTrack(dir) {
+            currentTrack = (currentTrack + dir + tracks.length) % tracks.length;
+            pbLoadTrack(currentTrack);
+            if (isPlaying) audio.play();
+        }
+
+        function pbSeek(val) {
+            if (audio.duration) audio.currentTime = (val / 100) * audio.duration;
+        }
+
+        function pbSetVolume(val) {
+            audio.volume = val / 100;
+            const pct = val + '%';
+            document.getElementById('pbVolumeSlider').style.background =
+                `linear-gradient(to right, #b3b3b3 ${pct}, #333 ${pct})`;
+        }
+
+        audio.addEventListener('timeupdate', () => {
+            if (!audio.duration) return;
+            const pct = (audio.currentTime / audio.duration) * 100;
+            const bar = document.getElementById('pbProgress');
+            bar.value = pct;
+            bar.style.background = `linear-gradient(to right, #FFD700 ${pct}%, #333 ${pct}%)`;
+            document.getElementById('pbCurrentTime').textContent = formatTime(audio.currentTime);
+        });
+
+        audio.addEventListener('loadedmetadata', () => {
+            document.getElementById('pbDuration').textContent = formatTime(audio.duration);
+        });
+
+        audio.addEventListener('ended', () => { pbChangeTrack(1); audio.play(); isPlaying = true; document.getElementById('pbPlayIcon').style.display = 'none'; document.getElementById('pbPauseIcon').style.display = ''; });
+
+        // Navigation
+        const frame = document.getElementById('pageFrame');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        const pageMap = {
+            '/':          '/page/home',
+            '/artists':   '/page/artists',
+            '/works':     '/page/works',
+            '/analytics': '/page/analytics',
+        };
+
+        function navigate(page) {
+            frame.src = pageMap[page] || '/page/home';
+            history.pushState({}, '', page);
+            navLinks.forEach(l => l.classList.toggle('active', l.dataset.page === page));
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', e => {
+                e.preventDefault();
+                navigate(link.dataset.page);
+            });
+        });
+
+        // Sync nav on browser back/forward
+        window.addEventListener('popstate', () => {
+            const page = location.pathname;
+            frame.src = pageMap[page] || '/page/home';
+            navLinks.forEach(l => l.classList.toggle('active', l.dataset.page === page));
+        });
+
+        // Set initial page from URL
+        const initialPage = location.pathname;
+        if (initialPage !== '/') {
+            frame.src = pageMap[initialPage] || '/page/home';
+            navLinks.forEach(l => l.classList.toggle('active', l.dataset.page === initialPage));
+        }
+    </script>
+</body>
+</html>

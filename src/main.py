@@ -211,18 +211,34 @@ def get_revenue_by_artist_month(db = Depends(get_db)):
 
 @app.get("/")
 def root():
-    return FileResponse("frontend/index.html")
+    return FileResponse("frontend/shell.html")
 
 @app.get("/artists")
 def artists():
-    return FileResponse("frontend/artists.html")
+    return FileResponse("frontend/shell.html")
 
 @app.get("/works")
 def works():
-    return FileResponse("frontend/works.html")
+    return FileResponse("frontend/shell.html")
 
 @app.get("/analytics")
 def analytics():
+    return FileResponse("frontend/shell.html")
+
+@app.get("/page/home")
+def page_home():
+    return FileResponse("frontend/index.html")
+
+@app.get("/page/artists")
+def page_artists():
+    return FileResponse("frontend/artists.html")
+
+@app.get("/page/works")
+def page_works():
+    return FileResponse("frontend/works.html")
+
+@app.get("/page/analytics")
+def page_analytics():
     return FileResponse("frontend/analytics.html")
 
 @app.get("/assets/audio/{filename}")

@@ -7,662 +7,386 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="/assets/shared.css">
     <style>
-        .dashboard {
-            padding: 32px 48px;
-            max-width: 1600px;
+        body { background: #0a0a0a; }
+
+        .dash {
+            padding: 40px 48px 48px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
-        .dashboard-header {
-            margin-bottom: 32px;
-        }
-
-        .dashboard-header h1 {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            letter-spacing: -0.8px;
-        }
-
-        .dashboard-header p {
-            color: #b3b3b3;
-            font-size: 14px;
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            margin-bottom: 40px;
-        }
-
-        .dashboard-card {
-            background-color: #181818;
-            border-radius: 12px;
-            padding: 24px;
-            transition: background-color 0.2s ease;
-            border: 1px solid transparent;
-        }
-
-        .dashboard-card:hover {
-            background-color: #282828;
-        }
-
-        .card-header {
+        /* Header row */
+        .dash-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
+            align-items: flex-end;
+            margin-bottom: 36px;
+        }
+        .dash-title {
+            font-size: 13px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #555;
+        }
+        .dash-date {
+            font-size: 12px;
+            color: #444;
+            letter-spacing: 0.04em;
+        }
+
+        /* KPI grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
             margin-bottom: 20px;
         }
 
-        .card-title {
-            color: #b3b3b3;
-            font-size: 13px;
-            font-weight: 500;
+        .kpi-card {
+            background: #111;
+            border: 1px solid #1e1e1e;
+            border-radius: 16px;
+            padding: 28px 28px 24px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.2s, transform 0.2s;
+            cursor: default;
+            animation: fadeUp 0.5s ease both;
+        }
+        .kpi-card:hover {
+            border-color: rgba(255, 215, 0, 0.2);
+            transform: translateY(-2px);
+        }
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: -40px; right: -40px;
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,215,0,0.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .kpi-card:nth-child(1) { animation-delay: 0s; }
+        .kpi-card:nth-child(2) { animation-delay: 0.08s; }
+        .kpi-card:nth-child(3) { animation-delay: 0.16s; }
+
+        .kpi-label {
+            font-size: 11px;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .card-icon {
-            opacity: 0.6;
-        }
-
-        .metric-value {
-            font-size: 40px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            letter-spacing: -1px;
-        }
-
-        .metric-label {
-            color: #b3b3b3;
-            font-size: 14px;
+            letter-spacing: 0.1em;
+            color: #555;
             margin-bottom: 16px;
         }
-
-        .metric-change {
+        .kpi-value {
+            font-size: 2.75rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+        .kpi-sub {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #555;
+        }
+        .kpi-badge {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            font-size: 13px;
-            font-weight: 500;
-            padding: 4px 8px;
-            border-radius: 4px;
-        }
-
-        .metric-change.positive {
-            color: #FFD700;
-            background-color: rgba(184, 215, 30, 0.1);
-        }
-
-        .metric-change.negative {
-            color: #f15e6c;
-            background-color: rgba(241, 94, 108, 0.1);
-        }
-
-        .progress-container {
-            margin-top: 16px;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background-color: #282828;
-            border-radius: 3px;
-            overflow: hidden;
-            margin-bottom: 8px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background-color: #FFD700;
-            border-radius: 3px;
-            transition: width 1s ease;
-        }
-
-        .progress-stats {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: #b3b3b3;
-        }
-
-        .artist-profile {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin-top: 16px;
-            padding: 12px;
-            background-color: #121212;
-            border-radius: 8px;
-        }
-
-        .artist-avatar {
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            flex-shrink: 0;
-        }
-
-        .artist-info h3 {
-            font-size: 15px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .artist-info p {
-            font-size: 13px;
-            color: #b3b3b3;
-        }
-
-        .release-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-top: 16px;
-        }
-
-        .release-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px;
-            background-color: #121212;
-            border-radius: 6px;
-            transition: background-color 0.2s ease;
-        }
-
-        .release-item:hover {
-            background-color: #282828;
-        }
-
-        .release-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .release-icon {
-            width: 40px;
-            height: 40px;
-            background-color: #282828;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-
-        .release-details h4 {
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 2px;
-        }
-
-        .release-details p {
-            font-size: 12px;
-            color: #b3b3b3;
-        }
-
-        .release-type {
+            gap: 3px;
             font-size: 11px;
-            color: #b3b3b3;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 500;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 20px;
+        }
+        .kpi-badge.up {
+            color: #4ade80;
+            background: rgba(74, 222, 128, 0.1);
+        }
+        .kpi-badge.down {
+            color: #f87171;
+            background: rgba(248, 113, 113, 0.1);
+        }
+        .kpi-badge.neutral {
+            color: #888;
+            background: rgba(136,136,136,0.1);
         }
 
-        @media (max-width: 768px) {
-            .dashboard { padding: 24px 16px; }
-            .dashboard-grid { grid-template-columns: 1fr; }
+        /* secondary info inside card */
+        .kpi-detail {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #1e1e1e;
+            font-size: 13px;
+            color: #888;
+        }
+        .kpi-detail strong {
+            color: #ccc;
+            font-weight: 600;
+        }
+
+        /* Chart section */
+        .chart-section {
+            background: #111;
+            border: 1px solid #1e1e1e;
+            border-radius: 16px;
+            padding: 28px;
+            animation: fadeUp 0.5s ease 0.28s both;
+        }
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .chart-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ccc;
+        }
+        .chart-subtitle {
+            font-size: 12px;
+            color: #444;
+            margin-top: 2px;
+        }
+        .chart-wrap {
+            position: relative;
+            height: 220px;
+        }
+
+        /* Skeleton */
+        .skel {
+            background: linear-gradient(90deg, #1a1a1a 25%, #222 50%, #1a1a1a 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s ease infinite;
+            border-radius: 6px;
+            color: transparent !important;
+            user-select: none;
+        }
+        .skel * { visibility: hidden; }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 900px) {
+            .dash { padding: 24px 16px 40px; }
+            .kpi-grid { grid-template-columns: 1fr; gap: 12px; }
+            .kpi-value { font-size: 2.2rem; }
+            .chart-wrap { height: 180px; }
         }
     </style>
 </head>
 <body>
-    <header class="top-bar">
-        <div class="logo-section">
-            <img src="/assets/phobos_logo.png" alt="Phobos Records Logo" class="logo">
-            <div class="brand-name">Phobos Records</div>
-        </div>
-        <nav>
-            <ul class="nav-menu">
-                <li><a href="/" class="active">Home</a></li>
-                <li><a href="/artists">Artists</a></li>
-                <li><a href="/works">Works</a></li>
-                <li><a href="/analytics">Analytics</a></li>
-            </ul>
-        </nav>
-    </header>
-
-    <div class="dashboard">
-        <div class="dashboard-header">
-            <p>Last updated: February 15, 2026</p>
-        </div>
-        
-        <div class="dashboard-grid">
-            <div class="dashboard-card">
-                <div class="card-header">
-                    <div class="card-title">Total Units Sold</div>
-                    <div class="card-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M2.5 3.5a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11zm2-2a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1h-7zM0 13a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 16 13V6a1.5 1.5 0 0 0-1.5-1.5h-13A1.5 1.5 0 0 0 0 6v7zm1.5.5A.5.5 0 0 1 1 13V6a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-13z"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="metric-value skeleton-text" data-metric="units">—</div>
-                <div class="metric-label">Works</div>
-                <div class="progress-container">
-                    <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
-                </div>
-            </div>
-
-            <div class="dashboard-card">
-                <div class="card-header">
-                    <div class="card-title">Revenue</div>
-                    <div class="card-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M1 3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1H1zm7 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>
-                            <path d="M0 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V5zm3 0a2 2 0 0 1-2 2v4a2 2 0 0 1 2 2h10a2 2 0 0 1 2-2V7a2 2 0 0 1-2-2H3z"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="metric-value skeleton-text" data-metric="revenue">—</div>
-                <div class="metric-label">USD</div>
-                <div class="progress-container">
-                    <div class="progress-bar"><div class="progress-fill" style="width:0%; background-color:#FFD700;"></div></div>
-                </div>
-            </div>
-
-            <div class="dashboard-card">
-                <div class="card-header">
-                    <div class="card-title">Top Artist</div>
-                    <div class="card-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm.256 7a4.474 4.474 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10c.26 0 .507.009.74.025.226-.341.496-.65.804-.918C9.077 9.038 8.564 9 8 9c-5 0-6 3-6 4s1 1 1 1h5.256Z"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="metric-value skeleton-text" data-metric="top-artist-streams">—</div>
-                <div class="metric-label">Total Revenue</div>
-                <div class="artist-profile">
-                    <div class="artist-avatar" style="background:linear-gradient(135deg,#FFD700,#FFA500);display:flex;align-items:center;justify-content:center;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="#000"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
-                    </div>
-                    <div class="artist-info">
-                        <h3 data-metric="top-artist-name" class="skeleton-text">—</h3>
-                        <p data-metric="top-artist-genre" class="skeleton-text">—</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="dashboard-card">
-                <div class="card-header">
-                    <div class="card-title">Recent Releases</div>
-                    <div class="card-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="metric-value" data-metric="releases-count">—</div>
-                <div class="metric-label">Recent releases</div>
-                <div class="release-list" data-metric="releases-list"></div>
-            </div>
-        </div>
-
-        <!-- Featured Tracks -->
-        <div style="margin-top: 40px; margin-bottom: 40px;">
-            <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 20px; letter-spacing: -0.5px;">Featured Tracks</h2>
-            <div id="playerGrid">
-                <!-- Track List -->
-                <div id="trackListCard">
-                    <div id="trackList"></div>
-                </div>
-                <!-- Now Playing Card -->
-                <div id="nowPlayingCard">
-                    <div id="cardGlow"></div>
-                    <div id="artworkWrap">
-                        <img id="playerCoverImg" src="/assets/albums/1.png" alt="">
-                    </div>
-                    <div id="trackInfo">
-                        <div id="playerTitle">—</div>
-                        <div id="playerArtist">—</div>
-                    </div>
-                    <div id="progressWrap">
-                        <input id="progressBar" type="range" min="0" max="100" value="0" oninput="seek(this.value)">
-                        <div id="timeRow">
-                            <span id="currentTime">0:00</span>
-                            <span id="duration">0:00</span>
-                        </div>
-                    </div>
-                    <div id="controls">
-                        <button class="ctrl-btn" onclick="changeTrack(-1)">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
-                        </button>
-                        <button id="playPauseBtn" class="play-btn" onclick="togglePlay()">
-                            <svg id="playIcon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                            <svg id="pauseIcon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                        </button>
-                        <button class="ctrl-btn" onclick="changeTrack(1)">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zm2-8.14 5.02 3.64L8 17.14V9.86zM16 6h2v12h-2z"/></svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <style>
-            #playerGrid {
-                display: grid;
-                grid-template-columns: 1fr 280px;
-                gap: 20px;
-                align-items: start;
-            }
-            #trackListCard {
-                background: #181818;
-                border-radius: 16px;
-                border: 1px solid #282828;
-                overflow: hidden;
-            }
-            #nowPlayingCard {
-                background: linear-gradient(160deg, #1e1e1e 0%, #141414 100%);
-                border-radius: 16px;
-                border: 1px solid rgba(255,215,0,0.12);
-                padding: 20px;
-                position: relative;
-                overflow: hidden;
-                display: flex;
-                flex-direction: column;
-                gap: 14px;
-            }
-            #cardGlow {
-                position: absolute; top: -60px; left: -60px;
-                width: 220px; height: 220px; border-radius: 50%;
-                background: rgba(255,215,0,0.06);
-                filter: blur(50px); pointer-events: none;
-            }
-            #artworkWrap {
-                width: 100%; aspect-ratio: 1;
-                border-radius: 12px; overflow: hidden;
-                background: #282828;
-                box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-            }
-            #artworkWrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
-            #trackInfo { position: relative; }
-            #playerTitle { font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
-            #playerArtist { font-size: 12px; color: #b3b3b3; }
-            #progressWrap { position: relative; }
-            #progressBar {
-                width: 100%; height: 4px; cursor: pointer;
-                background: linear-gradient(to right, #FFD700 0%, #333 0%);
-                border-radius: 2px; outline: none;
-                -webkit-appearance: none; appearance: none;
-                accent-color: #FFD700;
-            }
-            #progressBar::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #FFD700; cursor: pointer; }
-            #progressBar::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: #FFD700; border: none; cursor: pointer; }
-            #timeRow { display: flex; justify-content: space-between; margin-top: 5px; font-size: 11px; color: #777; }
-            #controls { display: flex; align-items: center; justify-content: center; gap: 16px; }
-            .ctrl-btn {
-                background: none; border: none; color: #b3b3b3; cursor: pointer;
-                padding: 8px; border-radius: 50%; transition: color 0.2s;
-                display: flex; align-items: center; justify-content: center;
-            }
-            .ctrl-btn:hover { color: #fff; }
-            .play-btn {
-                width: 48px; height: 48px; border-radius: 50%;
-                background: #FFD700; border: none; cursor: pointer; color: #000;
-                display: flex; align-items: center; justify-content: center;
-                box-shadow: 0 0 16px rgba(255,215,0,0.35);
-                transition: transform 0.15s, box-shadow 0.15s;
-            }
-            .play-btn:hover { transform: scale(1.06); box-shadow: 0 0 24px rgba(255,215,0,0.5); }
-            .track-row {
-                display: flex; align-items: center; gap: 14px;
-                padding: 12px 20px; cursor: pointer;
-                transition: background 0.15s; border-bottom: 1px solid #1e1e1e;
-            }
-            .track-row:last-child { border-bottom: none; }
-            .track-row:hover { background: #1e1e1e; }
-            .track-row.active { background: #222; }
-            .track-num { font-size: 12px; color: #777; min-width: 22px; text-align: center; font-variant-numeric: tabular-nums; }
-            .track-cover { width: 42px; height: 42px; border-radius: 6px; overflow: hidden; background: #282828; flex-shrink: 0; }
-            .track-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
-            .track-meta { flex: 1; min-width: 0; }
-            .track-meta-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
-            .track-meta-artist { font-size: 12px; color: #b3b3b3; }
-            .track-duration { font-size: 12px; color: #555; min-width: 36px; text-align: right; }
-
-            /* Mobile: Spotify bottom bar */
-            @media (max-width: 768px) {
-                #playerGrid {
-                    grid-template-columns: 1fr;
-                }
-                #nowPlayingCard {
-                    position: fixed;
-                    bottom: 0; left: 0; right: 0;
-                    border-radius: 0;
-                    border-top: 1px solid #282828;
-                    border-left: none; border-right: none; border-bottom: none;
-                    flex-direction: row;
-                    align-items: center;
-                    gap: 12px;
-                    padding: 10px 16px;
-                    z-index: 200;
-                    background: #181818;
-                }
-                #cardGlow { display: none; }
-                #artworkWrap {
-                    width: 48px !important;
-                    height: 48px !important;
-                    aspect-ratio: unset;
-                    flex-shrink: 0;
-                    border-radius: 6px;
-                }
-                #trackInfo { flex: 1; min-width: 0; gap: 0; }
-                #playerTitle { font-size: 13px; margin-bottom: 2px; }
-                #playerArtist { font-size: 11px; }
-                #progressWrap { display: none; }
-                #controls { gap: 4px; }
-                .ctrl-btn { padding: 6px; }
-                .play-btn { width: 40px; height: 40px; }
-                #trackListCard { margin-bottom: 80px; }
-            }
-            @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes shimmer { 0% { opacity: 0.4; } 50% { opacity: 0.8; } 100% { opacity: 0.4; } }
-        .skeleton-text { animation: shimmer 1.4s ease-in-out infinite; color: #444; }
-        </style>
+<div class="dash">
+    <div class="dash-header">
+        <div class="dash-title">Dashboard</div>
+        <div class="dash-date" id="dashDate"></div>
     </div>
 
-    <script>
-        // --- KPI Loader ---
-        async function loadDashboard() {
-            try {
-                const CACHE_KEY = 'phobos_dashboard';
-                let totRevData, totUnitsData, topArtistData, releasesData;
-                const cached = sessionStorage.getItem(CACHE_KEY);
-                if (cached) {
-                    ({ totRevData, totUnitsData, topArtistData, releasesData } = JSON.parse(cached));
-                } else {
-                    const [totRevRes, totUnitsRes, topArtistRes, releasesRes] = await Promise.all([
-                        fetch('/tot_revenue'),
-                        fetch('/tot_unit_sold'),
-                        fetch('/get_top_artist'),
-                        fetch('/recent_releases?limit=3')
-                    ]);
-                    totRevData = await totRevRes.json();
-                    totUnitsData = await totUnitsRes.json();
-                    topArtistData = await topArtistRes.json();
-                    releasesData = await releasesRes.json();
-                    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ totRevData, totUnitsData, topArtistData, releasesData }));
-                }
+    <div class="kpi-grid">
+        <!-- Revenue MTD -->
+        <div class="kpi-card" id="cardMtd">
+            <div class="kpi-label">Revenue MTD</div>
+            <div class="kpi-value skel" id="mtdValue">$000K</div>
+            <div class="kpi-sub">
+                <span class="kpi-badge neutral skel" id="mtdBadge">+0.0%</span>
+                <span id="mtdLabel">vs last month</span>
+            </div>
+        </div>
 
-                document.querySelector('.dashboard-header p').textContent =
-                    `Last updated: ${new Date().toLocaleDateString('en-GB', {day: 'numeric', month: 'long', year: 'numeric'})}`;
-                const setMetric = (sel, val) => {
-                    const el = document.querySelector(sel);
-                    if (el) { el.textContent = val; el.classList.remove('skeleton-text'); }
-                };
-                setMetric('[data-metric="units"]', totUnitsData.total_units.toLocaleString());
-                setMetric('[data-metric="revenue"]', `$${Number(totRevData.total_revenue).toLocaleString(undefined, {maximumFractionDigits: 0})}`);
-                setMetric('[data-metric="top-artist-name"]', topArtistData.artist_name || '—');
-                setMetric('[data-metric="top-artist-genre"]', topArtistData.main_genre || '—');
-                setMetric('[data-metric="top-artist-streams"]', `$${Number(topArtistData.total_revenue || 0).toLocaleString(undefined, {maximumFractionDigits: 0})}`);
-                setMetric('[data-metric="releases-count"]', releasesData.releases.length);
+        <!-- Top Artist -->
+        <div class="kpi-card" id="cardArtist">
+            <div class="kpi-label">Top Artist — MTD</div>
+            <div class="kpi-value skel" id="artistName" style="font-size:1.75rem;letter-spacing:-0.02em;">—</div>
+            <div class="kpi-sub">
+                <span class="kpi-badge neutral skel" id="artistRevenue">$0</span>
+                <span id="artistGenre" style="color:#444">—</span>
+            </div>
+        </div>
 
-                const releaseList = document.querySelector('[data-metric="releases-list"]');
-                releaseList.innerHTML = '';
-                releasesData.releases.forEach((release, idx) => {
-                    const releaseItem = document.createElement('div');
-                    releaseItem.className = 'release-item';
-                    const releaseIconDiv = document.createElement('div');
-                    releaseIconDiv.className = 'release-icon';
-                    releaseIconDiv.style.fontSize = '0';
-                    const img = document.createElement('img');
-                    img.src = `/assets/albums/${idx + 1}.png`;
-                    img.style.cssText = 'width:40px;height:40px;border-radius:4px;object-fit:cover;';
-                    img.onerror = () => { img.style.display = 'none'; releaseIconDiv.textContent = ['💿', '🎵', '🎶'][idx % 3]; releaseIconDiv.style.fontSize = '18px'; };
-                    img.onload = () => { releaseIconDiv.innerHTML = ''; releaseIconDiv.appendChild(img); };
-                    releaseItem.innerHTML = `<div class="release-info"><div class="release-details"><h4>${release.title}</h4><p>${release.artist_name}</p></div></div><div class="release-type">${release.release_date?.substring(0, 7) || ''}</div>`;
-                    releaseItem.insertBefore(releaseIconDiv, releaseItem.querySelector('.release-info'));
-                    releaseList.appendChild(releaseItem);
-                });
-            } catch (error) {
-                console.error('Error loading dashboard:', error);
-            }
-        }
+        <!-- Top Work -->
+        <div class="kpi-card" id="cardWork">
+            <div class="kpi-label">Top Work — MTD</div>
+            <div class="kpi-value skel" id="workTitle" style="font-size:1.6rem;letter-spacing:-0.02em;">—</div>
+            <div class="kpi-sub">
+                <span class="kpi-badge neutral skel" id="workRevenue">$0</span>
+                <span id="workArtist" style="color:#444">—</span>
+            </div>
+        </div>
+    </div>
 
-        // --- Audio Player ---
-        const tracks = [
-            { title: 'Frozen Circuit',artist: 'Frost Byte', src: '/assets/audio/Frozen Circuit.mp3',cover: '/assets/albums/3.png' },
-            { title: 'Event Horizon', artist: 'Lyra Void',  src: '/assets/audio/Event Horizon.mp3', cover: '/assets/albums/1.png' },
-            { title: 'Neon Pulse',    artist: 'Neon Pulse',  src: '/assets/audio/Neon Pulse.mp3',    cover: '/assets/albums/2.png' },
-            { title: 'Digital Rush',  artist: 'Velocity',    src: '/assets/audio/Digital Rush.mp3',  cover: '/assets/albums/4.png' },
-            { title: 'Neon Nights',   artist: 'Echo Waves',  src: '/assets/audio/Neon Nights.mp3',   cover: '/assets/albums/5.png' },
-        ];
+    <!-- Chart -->
+    <div class="chart-section">
+        <div class="chart-header">
+            <div>
+                <div class="chart-title">Monthly Revenue</div>
+                <div class="chart-subtitle">Last 6 months</div>
+            </div>
+        </div>
+        <div class="chart-wrap">
+            <canvas id="trendChart"></canvas>
+        </div>
+    </div>
+</div>
 
-        let currentTrack = 0;
-        let audio = new Audio();
-        let isPlaying = false;
+<script>
+    document.getElementById('dashDate').textContent =
+        new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
-        function formatTime(s) {
-            if (!s || isNaN(s) || !isFinite(s) || s < 0) return '0:00';
-            const m = Math.floor(s / 60);
-            return `${m}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
-        }
+    function fmt(n) {
+        if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
+        if (n >= 1e3) return '$' + (n / 1e3).toFixed(1) + 'K';
+        return '$' + Math.round(n).toLocaleString();
+    }
 
-        function loadTrack(idx) {
-            const t = tracks[idx];
-            audio.src = t.src;
-            document.getElementById('playerTitle').textContent = t.title;
-            document.getElementById('playerArtist').textContent = t.artist;
-            document.getElementById('playerCoverImg').src = t.cover;
-            document.getElementById('progressBar').value = 0;
-            document.getElementById('progressBar').style.background = 'linear-gradient(to right, #FFD700 0%, #333 0%)';
-            document.getElementById('currentTime').textContent = '0:00';
-            document.getElementById('duration').textContent = '0:00';
-            document.querySelectorAll('.track-row').forEach((row, i) => {
-                row.classList.toggle('active', i === idx);
-                row.querySelector('.track-num').innerHTML = i === idx && isPlaying
-                    ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="#FFD700"><path d="M8 5v14l11-7z"/></svg>'
-                    : String(i + 1).padStart(2, '0');
-            });
-        }
+    function unskel(el) {
+        if (el) el.classList.remove('skel');
+    }
 
-        function togglePlay() {
-            if (isPlaying) {
-                audio.pause();
-                isPlaying = false;
-                document.getElementById('playIcon').style.display = '';
-                document.getElementById('pauseIcon').style.display = 'none';
-                const row = document.querySelectorAll('.track-row')[currentTrack];
-                if (row) { row.querySelector('.track-num').innerHTML = String(currentTrack + 1).padStart(2, '0'); }
-            } else {
-                audio.play();
-                isPlaying = true;
-                document.getElementById('playIcon').style.display = 'none';
-                document.getElementById('pauseIcon').style.display = '';
-                const row = document.querySelectorAll('.track-row')[currentTrack];
-                if (row) { row.querySelector('.track-num').innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="#FFD700"><path d="M8 5v14l11-7z"/></svg>'; }
-            }
-        }
+    let trendChart = null;
 
-        function changeTrack(dir) {
-            currentTrack = (currentTrack + dir + tracks.length) % tracks.length;
-            loadTrack(currentTrack);
-            if (isPlaying) audio.play();
-        }
+    function renderChart(labels, values) {
+        const ctx = document.getElementById('trendChart').getContext('2d');
+        const grad = ctx.createLinearGradient(0, 0, 0, 220);
+        grad.addColorStop(0, 'rgba(255,215,0,0.18)');
+        grad.addColorStop(1, 'rgba(255,215,0,0)');
 
-        function seek(val) {
-            if (audio.duration) audio.currentTime = (val / 100) * audio.duration;
-        }
-
-        function buildTrackList() {
-            const list = document.getElementById('trackList');
-            tracks.forEach((t, i) => {
-                const row = document.createElement('div');
-                row.className = 'track-row';
-                row.innerHTML = `
-                    <span class="track-num">${String(i + 1).padStart(2, '0')}</span>
-                    <div class="track-cover"><img src="${t.cover}" onerror="this.style.display='none'" alt=""></div>
-                    <div class="track-meta">
-                        <div class="track-meta-title">${t.title}</div>
-                        <div class="track-meta-artist">${t.artist}</div>
-                    </div>
-                    <span class="track-duration"></span>
-                `;
-                row.addEventListener('click', () => {
-                    if (currentTrack === i && isPlaying) { togglePlay(); return; }
-                    currentTrack = i;
-                    loadTrack(i);
-                    isPlaying = false;
-                    togglePlay();
-                });
-                list.appendChild(row);
-            });
-        }
-
-        audio.addEventListener('timeupdate', () => {
-            if (audio.duration) {
-                const pct = (audio.currentTime / audio.duration) * 100;
-                const bar = document.getElementById('progressBar');
-                bar.value = pct;
-                bar.style.background = `linear-gradient(to right, #FFD700 ${pct}%, #333 ${pct}%)`;
-                document.getElementById('currentTime').textContent = formatTime(audio.currentTime);
-            }
-        });
-        audio.addEventListener('loadedmetadata', () => {
-            document.getElementById('duration').textContent = formatTime(audio.duration);
-        });
-
-        // Pre-load durations for track list
-        function loadTrackDurations() {
-            tracks.forEach((t, i) => {
-                const a = new Audio();
-                a.src = t.src;
-                a.addEventListener('loadedmetadata', () => {
-                    const rows = document.querySelectorAll('.track-row');
-                    if (rows[i]) {
-                        const span = rows[i].querySelector('.track-duration');
-                        if (span) span.textContent = formatTime(a.duration);
+        if (trendChart) trendChart.destroy();
+        trendChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    data: values,
+                    borderColor: '#FFD700',
+                    borderWidth: 2,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#FFD700',
+                    pointBorderColor: '#0a0a0a',
+                    pointBorderWidth: 2,
+                    fill: true,
+                    backgroundColor: grad,
+                    tension: 0.4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { intersect: false, mode: 'index' },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1a1a1a',
+                        borderColor: '#2a2a2a',
+                        borderWidth: 1,
+                        titleColor: '#888',
+                        bodyColor: '#fff',
+                        bodyFont: { weight: '600', size: 14 },
+                        callbacks: { label: ctx => ' ' + fmt(ctx.parsed.y) }
                     }
-                });
-            });
-        }
-        audio.addEventListener('ended', () => { changeTrack(1); audio.play(); });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            loadDashboard();
-            buildTrackList();
-            loadTrack(0);
-            loadTrackDurations();
+                },
+                scales: {
+                    x: {
+                        grid: { color: '#1a1a1a' },
+                        ticks: { color: '#555', font: { size: 11 } },
+                        border: { display: false }
+                    },
+                    y: {
+                        grid: { color: '#1a1a1a' },
+                        ticks: {
+                            color: '#555', font: { size: 11 },
+                            callback: v => fmt(v)
+                        },
+                        border: { display: false }
+                    }
+                }
+            }
         });
-    </script>
+    }
+
+    async function loadDashboard() {
+        const CACHE_KEY = 'phobos_dash_v2';
+        let d = null;
+        const cached = sessionStorage.getItem(CACHE_KEY);
+        if (cached) { try { d = JSON.parse(cached); } catch(_) {} }
+
+        if (!d) {
+            const [mtdRes, artistRes, workRes, trendRes] = await Promise.all([
+                fetch('/api/revenue/mtd'),
+                fetch('/api/top-artist-mtd'),
+                fetch('/api/top-work'),
+                fetch('/api/revenue/trend6m'),
+            ]);
+            d = {
+                mtd:    await mtdRes.json(),
+                artist: await artistRes.json(),
+                work:   await workRes.json(),
+                trend:  await trendRes.json(),
+            };
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify(d));
+        }
+
+        // Revenue MTD
+        const mtdEl = document.getElementById('mtdValue');
+        mtdEl.textContent = fmt(d.mtd.value);
+        unskel(mtdEl);
+
+        const badge = document.getElementById('mtdBadge');
+        const pct = d.mtd.vs_last_month_pct;
+        if (pct !== null && pct !== undefined) {
+            const up = pct >= 0;
+            badge.textContent = (up ? '↑ ' : '↓ ') + Math.abs(pct).toFixed(1) + '%';
+            badge.className = 'kpi-badge ' + (up ? 'up' : 'down');
+        } else {
+            badge.textContent = 'N/A';
+            badge.className = 'kpi-badge neutral';
+        }
+        unskel(badge);
+        if (d.mtd.month) document.getElementById('mtdLabel').textContent = d.mtd.month;
+
+        // Top Artist
+        const artistNameEl = document.getElementById('artistName');
+        artistNameEl.textContent = d.artist.name || '—';
+        unskel(artistNameEl);
+
+        const artistRevEl = document.getElementById('artistRevenue');
+        artistRevEl.textContent = fmt(d.artist.revenue || 0);
+        artistRevEl.className = 'kpi-badge neutral';
+        unskel(artistRevEl);
+
+        const artistGenreEl = document.getElementById('artistGenre');
+        artistGenreEl.textContent = d.artist.genre || '—';
+
+        // Top Work
+        const workTitleEl = document.getElementById('workTitle');
+        workTitleEl.textContent = d.work.title || '—';
+        unskel(workTitleEl);
+
+        const workRevEl = document.getElementById('workRevenue');
+        workRevEl.textContent = fmt(d.work.revenue || 0);
+        workRevEl.className = 'kpi-badge neutral';
+        unskel(workRevEl);
+
+        const workArtistEl = document.getElementById('workArtist');
+        workArtistEl.textContent = d.work.artist || '—';
+
+        // Chart
+        const labels = d.trend.trend.map(t => t.month);
+        const values = d.trend.trend.map(t => t.revenue);
+        renderChart(labels, values);
+    }
+
+    document.addEventListener('DOMContentLoaded', loadDashboard);
+</script>
 </body>
 </html>
