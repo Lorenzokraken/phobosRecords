@@ -268,7 +268,7 @@ def shared_js():
 def get_artist_image(filename: str):
     image_path = Path(__file__).parent.parent / "frontend" / "src" / "artists" / filename
     if not image_path.exists():
-        return Response(status_code=404)
+        return Response(status_code=204)
     return FileResponse(str(image_path))
 
 @app.get("/assets/albums/{filename}")
