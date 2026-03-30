@@ -324,6 +324,22 @@
         </div>
     </div>
 
+    <!-- Top Track Card -->
+    <div id="topTrackCard" style="margin-bottom:20px;background:#111;border:1px solid #1e1e1e;border-radius:16px;padding:24px;display:flex;align-items:center;gap:24px;animation:fadeUp 0.5s ease 0.22s both;">
+        <div id="topTrackCoverWrap" style="flex-shrink:0;width:80px;height:80px;border-radius:10px;overflow:hidden;background:#1e1e1e;">
+            <img id="topTrackCover" src="#" alt="" style="width:100%;height:100%;object-fit:cover;display:none;">
+        </div>
+        <div style="flex:1;min-width:0;">
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:#555;margin-bottom:8px;">Top Track — MTD</div>
+            <div id="topTrackTitle" class="skel" style="font-size:1.4rem;font-weight:700;letter-spacing:-0.02em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;">——————</div>
+            <div id="topTrackArtist" style="font-size:13px;color:#b3b3b3;"></div>
+        </div>
+        <div style="flex-shrink:0;text-align:right;">
+            <div id="topTrackRevenue" class="skel" style="font-size:1.5rem;font-weight:700;color:#FFD700;letter-spacing:-0.02em;">$0K</div>
+            <div style="font-size:11px;color:#555;margin-top:4px;">gross revenue</div>
+        </div>
+    </div>
+
     <!-- Chart -->
     <div class="chart-section">
         <div class="chart-header">
@@ -479,15 +495,32 @@
         const workArtistEl = document.getElementById('workArtist');
         workArtistEl.textContent = d.work.artist || '—';
 
+        // Top Track Card
+        const coverImg = document.getElementById('topTrackCover');
+        const coverWrap = document.getElementById('topTrackCoverWrap');
+        const titleEl = document.getElementById('topTrackTitle');
+        const artistEl = document.getElementById('topTrackArtist');
+        const revEl = document.getElementById('topTrackRevenue');
+
+        titleEl.textContent = d.work.title || '—';
+        unskel(titleEl);
+        artistEl.textContent = d.work.artist || '—';
+        revEl.textContent = fmt(d.work.revenue || 0);
+        unskel(revEl);
+
+        if (d.work.work_cover) {
+            coverImg.src = `/assets/albums/${d.work.work_cover}`;
+            coverImg.onload = () => { coverImg.style.display = 'block'; };
+            coverImg.onerror = () => { coverImg.style.display = 'none'; coverWrap.style.background = '#2a2a2a'; };
+        } else {
+            coverWrap.style.background = '#2a2a2a';
+        }
+
         // Chart
         const labels = d.trend.trend.map(t => t.month);
         const values = d.trend.trend.map(t => t.revenue);
         renderChart(labels, values);
 
-        // Build track list
-        buildTrackList();
-        loadTrack(0);
-        loadTrackDurations();
     }
 
     // Track data

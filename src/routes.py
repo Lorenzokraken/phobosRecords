@@ -551,10 +551,12 @@ def top_work(db=Depends(get_db)):
     cur = db.cursor()
     cur.execute("""
         WITH latest AS (SELECT MAX(purchase_month) AS mo FROM aggregated_royalties)
-        SELECT work_id, work_title, artist_name, SUM(gross_rev) AS revenue
-        FROM aggregated_royalties, latest
-        WHERE purchase_month = latest.mo
-        GROUP BY work_id, work_title, artist_name
+        SELECT ar.work_id, ar.work_title, ar.artist_name, SUM(ar.gross_rev) AS revenue, w.work_cover
+        FROM aggregated_royalties ar
+        LEFT JOIN works w ON w.work_id = ar.work_id,
+        latest
+        WHERE ar.purchase_month = latest.mo
+        GROUP BY ar.work_id, ar.work_title, ar.artist_name, w.work_cover
         ORDER BY revenue DESC
         LIMIT 1
     """)
@@ -562,7 +564,7 @@ def top_work(db=Depends(get_db)):
     cur.close()
     if not row:
         raise HTTPException(status_code=404, detail="No works found")
-    return {"work_id": row[0], "title": row[1], "artist": row[2], "revenue": float(row[3])}
+    return {"work_id": row[0], "title": row[1], "artist": row[2], "revenue": float(row[3]), "work_cover": row[4] or ""}
 
 
 @router.get("/api/top-artist-mtd")
