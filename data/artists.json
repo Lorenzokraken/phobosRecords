@@ -6,7 +6,7 @@
    "advanced_paid": 5000.0,
    "advance_pending": 2000.0,
    "is_front_artist": true,
-   "artist_image": "https://phobosrecords.com/images/lyra_void.jpg",
+   "artist_image": "/assets/artists/1.png",
    "main_genre": "Techno",
    "work_type": "Album"
   },
@@ -16,7 +16,7 @@
    "advanced_paid": 3500.0,
    "advance_pending": 1500.0,
    "is_front_artist": true,
-   "artist_image": "https://phobosrecords.com/images/solaris.jpg",
+   "artist_image": "/assets/artists/2.png",
    "main_genre": "Techno",
    "work_type": "Album"
   },
@@ -26,7 +26,7 @@
    "advanced_paid": 2000.0,
    "advance_pending": 1000.0,
    "is_front_artist": false,
-   "artist_image": "https://phobosrecords.com/images/nebula.jpg",
+   "artist_image": "/assets/artists/3.png",
    "main_genre": "Rock",
    "work_type": "Album"
   },
@@ -36,7 +36,7 @@
    "advanced_paid": 4000.0,
    "advance_pending": 1800.0,
    "is_front_artist": true,
-   "artist_image": "https://phobosrecords.com/images/echo_waves.jpg",
+   "artist_image": "/assets/artists/4.png",
    "main_genre": "Synthwave",
    "work_type": "Album"
   },
@@ -46,7 +46,7 @@
    "advanced_paid": 3000.0,
    "advance_pending": 1200.0,
    "is_front_artist": false,
-   "artist_image": "https://phobosrecords.com/images/crimson_tide.jpg",
+   "artist_image": "/assets/artists/5.png",
    "main_genre": "Rock",
    "work_type": "Album"
   },
@@ -56,7 +56,7 @@
    "advanced_paid": 2500.0,
    "advance_pending": 1300.0,
    "is_front_artist": false,
-   "artist_image": "https://phobosrecords.com/images/velocity.jpg",
+   "artist_image": "/assets/artists/6.png",
    "main_genre": "Synthwave",
    "work_type": "Single"
   },
@@ -66,7 +66,7 @@
    "advanced_paid": 1500.0,
    "advance_pending": 800.0,
    "is_front_artist": false,
-   "artist_image": "https://phobosrecords.com/images/luna_moth.jpg",
+   "artist_image": "/assets/artists/7.png",
    "main_genre": "Folk",
    "work_type": "EP"
   },
@@ -76,7 +76,7 @@
    "advanced_paid": 3200.0,
    "advance_pending": 1400.0,
    "is_front_artist": false,
-   "artist_image": "https://phobosrecords.com/images/phoenix_rise.jpg",
+   "artist_image": "/assets/artists/8.png",
    "main_genre": "Rock",
    "work_type": "Album"
   },
@@ -86,7 +86,7 @@
    "advanced_paid": 2800.0,
    "advance_pending": 1100.0,
    "is_front_artist": false,
-   "artist_image": "https://phobosrecords.com/images/stellar_flare.jpg",
+   "artist_image": "/assets/artists/9.png",
    "main_genre": "Synthwave",
    "work_type": "Album"
   },
@@ -96,7 +96,7 @@
    "advanced_paid": 3800.0,
    "advance_pending": 1600.0,
    "is_front_artist": false,
-   "artist_image": "https://phobosrecords.com/images/frost_byte.jpg",
+   "artist_image": "",
    "main_genre": "Techno",
    "work_type": "Album"
   },
@@ -106,7 +106,7 @@
    "advanced_paid": 2900.0,
    "advance_pending": 1100.0,
    "is_front_artist": true,
-   "artist_image": "https://phobosrecords.com/images/neon_pulse.jpg",
+   "artist_image": "",
    "main_genre": "Synthwave",
    "work_type": "Single"
   },
@@ -116,7 +116,7 @@
    "advanced_paid": 4500.0,
    "advance_pending": 2000.0,
    "is_front_artist": true,
-   "artist_image": "https://phobosrecords.com/images/cyber_dawn.jpg",
+   "artist_image": "",
    "main_genre": "Techno",
    "work_type": "Album"
   },
@@ -126,7 +126,7 @@
    "advanced_paid": 2100.0,
    "advance_pending": 900.0,
    "is_front_artist": false,
-   "artist_image": "https://phobosrecords.com/images/void_walker.jpg",
+   "artist_image": "",
    "main_genre": "Ambient",
    "work_type": "EP"
   },
@@ -136,7 +136,7 @@
    "advanced_paid": 3100.0,
    "advance_pending": 1300.0,
    "is_front_artist": true,
-   "artist_image": "https://phobosrecords.com/images/crystal_echo.jpg",
+   "artist_image": "",
    "main_genre": "Rock",
    "work_type": "Album"
   },
@@ -146,7 +146,7 @@
    "advanced_paid": 3600.0,
    "advance_pending": 1500.0,
    "is_front_artist": false,
-   "artist_image": "https://phobosrecords.com/images/iron_horizon.jpg",
+   "artist_image": "",
    "main_genre": "Industrial",
    "work_type": "Album"
   },
@@ -156,7 +156,7 @@
    "advanced_paid": 1800.0,
    "advance_pending": 700.0,
    "is_front_artist": false,
-   "artist_image": "https://phobosrecords.com/images/silent_orbit.jpg",
+   "artist_image": "",
    "main_genre": "Ambient",
    "work_type": "Single"
   },
@@ -166,7 +166,7 @@
    "advanced_paid": 3300.0,
    "advance_pending": 1400.0,
    "is_front_artist": true,
-   "artist_image": "https://phobosrecords.com/images/quantum_beat.jpg",
+   "artist_image": "",
    "main_genre": "Techno",
    "work_type": "Album"
   },
@@ -176,7 +176,7 @@
    "advanced_paid": 2700.0,
    "advance_pending": 1200.0,
    "is_front_artist": false,
-   "artist_image": "https://phobosrecords.com/images/astral_plane.jpg",
+   "artist_image": "",
    "main_genre": "Ambient",
    "work_type": "EP"
   },
@@ -186,7 +186,7 @@
    "advanced_paid": 3000.0,
    "advance_pending": 1300.0,
    "is_front_artist": true,
-   "artist_image": "https://phobosrecords.com/images/midnight_sun.jpg",
+   "artist_image": "",
    "main_genre": "Ambient",
    "work_type": "Album"
   },
@@ -196,7 +196,7 @@
    "advanced_paid": 4200.0,
    "advance_pending": 1900.0,
    "is_front_artist": true,
-   "artist_image": "https://phobosrecords.com/images/gravity_well.jpg",
+   "artist_image": "",
    "main_genre": "Techno",
    "work_type": "Album"
   }

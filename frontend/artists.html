@@ -207,14 +207,13 @@
                 const card = grid.lastElementChild;
                 const img = card.querySelector('img');
                 const imgWrap = card.querySelector('.artist-image');
-                const localIdx = start + pageIdx + 1;
                 img.onload = () => { img.style.display = 'block'; imgWrap.style.backgroundColor = 'transparent'; };
                 img.onerror = () => {
                     img.style.display = 'none';
                     imgWrap.style.backgroundColor = getRandomColor();
                     imgWrap.style.width = '100px'; imgWrap.style.height = '100px'; imgWrap.style.borderRadius = '50%';
                 };
-                img.src = `/assets/artists/${localIdx}.png`;
+                img.src = artist.artist_image || '';
                 img.alt = artist.artist_name;
             });
             renderPagination(artists.length);
