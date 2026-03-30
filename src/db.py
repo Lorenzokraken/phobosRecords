@@ -1,11 +1,30 @@
 import psycopg2
+from psycopg2 import pool
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
+_pool = None
+
+def get_pool():
+    global _pool
+    if _pool is None:
+        database_url = os.getenv("DATABASE_URL")
+        if database_url:
+            _pool = pool.ThreadedConnectionPool(2, 10, database_url)
+        else:
+            _pool = pool.ThreadedConnectionPool(2, 10,
+                host=os.getenv("DB_HOST", "localhost"),
+                port=int(os.getenv("DB_PORT", 5432)),
+                database=os.getenv("DB_NAME", "phobos_records"),
+                user=os.getenv("DB_USER", "postgres"),
+                password=os.getenv("DB_PASSWORD", "airvana")
+            )
+    return _pool
+
 def connect_db():
-    """Return a new connection to the PostgreSQL database."""
+    """Return a new connection to the PostgreSQL database (used by non-request code)."""
     database_url = os.getenv("DATABASE_URL")
     if database_url:
         return psycopg2.connect(database_url)
@@ -18,11 +37,12 @@ def connect_db():
     )
 
 def get_db():
-    conn = connect_db()
+    p = get_pool()
+    conn = p.getconn()
     try:
         yield conn
     finally:
-        conn.close()
+        p.putconn(conn)
 def create_tables():
     """Create the necessary tables in the database if they don't exist."""
     conn = connect_db()
