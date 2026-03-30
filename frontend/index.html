@@ -158,6 +158,103 @@
             height: 220px;
         }
 
+        /* Featured Tracks */
+        #playerSection {
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
+        }
+        #playerGrid {
+            display: grid;
+            grid-template-columns: 1fr 280px;
+            gap: 20px;
+            align-items: start;
+        }
+        #trackListCard {
+            background: #181818;
+            border-radius: 16px;
+            border: 1px solid #282828;
+            overflow: hidden;
+        }
+        #trackList { display: flex; flex-direction: column; }
+        .track-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background 0.15s;
+            border-bottom: 1px solid #1e1e1e;
+        }
+        .track-row:last-child { border-bottom: none; }
+        .track-row:hover { background: #1e1e1e; }
+        .track-row.active { background: #222; }
+        .track-num { font-size: 12px; color: #777; min-width: 22px; text-align: center; font-variant-numeric: tabular-nums; }
+        .track-cover { width: 42px; height: 42px; border-radius: 6px; overflow: hidden; background: #282828; flex-shrink: 0; }
+        .track-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .track-meta { flex: 1; min-width: 0; }
+        .track-meta-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+        .track-meta-artist { font-size: 12px; color: #b3b3b3; }
+
+        #nowPlayingCard {
+            background: linear-gradient(160deg, #1e1e1e 0%, #141414 100%);
+            border-radius: 16px;
+            border: 1px solid rgba(255,215,0,0.12);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        #cardGlow {
+            position: absolute; top: -60px; left: -60px;
+            width: 220px; height: 220px; border-radius: 50%;
+            background: rgba(255,215,0,0.06);
+            filter: blur(50px); pointer-events: none;
+        }
+        #artworkWrap {
+            width: 100%; aspect-ratio: 1;
+            border-radius: 12px; overflow: hidden;
+            background: #282828;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+        #artworkWrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        #trackInfo { position: relative; }
+        #playerTitle { font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+        #playerArtist { font-size: 12px; color: #b3b3b3; }
+        #progressWrap { position: relative; }
+        #progressBar {
+            width: 100%; height: 4px; cursor: pointer;
+            background: linear-gradient(to right, #FFD700 0%, #333 0%);
+            border-radius: 2px; outline: none;
+            -webkit-appearance: none; appearance: none;
+            accent-color: #FFD700;
+        }
+        #progressBar::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #FFD700; cursor: pointer; }
+        #progressBar::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: #FFD700; border: none; cursor: pointer; }
+        #timeRow { display: flex; justify-content: space-between; margin-top: 5px; font-size: 11px; color: #777; }
+        #controls { display: flex; align-items: center; justify-content: center; gap: 16px; }
+        .ctrl-btn {
+            background: none; border: none; color: #b3b3b3; cursor: pointer;
+            padding: 8px; border-radius: 50%; transition: color 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .ctrl-btn:hover { color: #fff; }
+        .play-btn {
+            width: 48px; height: 48px; border-radius: 50%;
+            background: #FFD700; border: none; cursor: pointer; color: #000;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 16px rgba(255,215,0,0.35);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .play-btn:hover { transform: scale(1.06); box-shadow: 0 0 24px rgba(255,215,0,0.5); }
+
         /* Skeleton */
         .skel {
             background: linear-gradient(90deg, #1a1a1a 25%, #222 50%, #1a1a1a 75%);
@@ -183,6 +280,8 @@
             .kpi-grid { grid-template-columns: 1fr; gap: 12px; }
             .kpi-value { font-size: 2.2rem; }
             .chart-wrap { height: 180px; }
+            #playerGrid { grid-template-columns: 1fr; }
+            #trackListCard { margin-bottom: 80px; }
         }
     </style>
 </head>
@@ -384,7 +483,92 @@
         const labels = d.trend.trend.map(t => t.month);
         const values = d.trend.trend.map(t => t.revenue);
         renderChart(labels, values);
+
+        // Build track list
+        buildTrackList();
+        loadTrack(0);
+        loadTrackDurations();
     }
+
+    // Track data
+    const tracks = [
+        { title: 'Frozen Circuit', artist: 'Frost Byte', cover: '/assets/albums/3.png' },
+        { title: 'Event Horizon',  artist: 'Lyra Void',  cover: '/assets/albums/1.png' },
+        { title: 'Neon Pulse',     artist: 'Neon Pulse', cover: '/assets/albums/2.png' },
+        { title: 'Digital Rush',   artist: 'Velocity',   cover: '/assets/albums/4.png' },
+        { title: 'Neon Nights',    artist: 'Echo Waves', cover: '/assets/albums/5.png' },
+    ];
+
+    let currentTrack = 0;
+
+    function buildTrackList() {
+        const list = document.getElementById('trackList');
+        tracks.forEach((t, i) => {
+            const row = document.createElement('div');
+            row.className = 'track-row';
+            row.innerHTML = `
+                <span class="track-num">${String(i + 1).padStart(2, '0')}</span>
+                <div class="track-cover"><img src="${t.cover}" alt=""></div>
+                <div class="track-meta">
+                    <div class="track-meta-title">${t.title}</div>
+                    <div class="track-meta-artist">${t.artist}</div>
+                </div>
+                <span class="track-duration"></span>
+            `;
+            row.addEventListener('click', () => {
+                currentTrack = i;
+                if (window.parent && window.parent.pbTogglePlay) {
+                    window.parent.pbTogglePlay();
+                }
+                updateTrackList();
+            });
+            list.appendChild(row);
+        });
+    }
+
+    function loadTrack(idx) {
+        currentTrack = idx;
+        const t = tracks[idx];
+        document.getElementById('playerTitle').textContent = t.title;
+        document.getElementById('playerArtist').textContent = t.artist;
+        document.getElementById('playerCoverImg').src = t.cover;
+        document.getElementById('progressBar').value = 0;
+        document.getElementById('progressBar').style.background = 'linear-gradient(to right, #FFD700 0%, #333 0%)';
+        document.getElementById('currentTime').textContent = '0:00';
+        document.getElementById('duration').textContent = '0:00';
+        updateTrackList();
+    }
+
+    function updateTrackList() {
+        document.querySelectorAll('.track-row').forEach((row, i) => {
+            row.classList.toggle('active', i === currentTrack);
+            row.querySelector('.track-num').innerHTML =
+                (i === currentTrack && window.parent && window.parent.pbIsPlaying)
+                    ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="#FFD700"><path d="M8 5v14l11-7z"/></svg>'
+                    : String(i + 1).padStart(2, '0');
+        });
+    }
+
+    function loadTrackDurations() {
+        tracks.forEach((t, i) => {
+            const a = new Audio();
+            a.src = `/assets/audio/${t.title}.mp3`;
+            a.addEventListener('loadedmetadata', () => {
+                const rows = document.querySelectorAll('.track-row');
+                if (rows[i]) {
+                    const span = rows[i].querySelector('.track-duration');
+                    if (span) span.textContent = formatTime(a.duration);
+                }
+            });
+        });
+    }
+
+    function formatTime(s) {
+        if (!s || isNaN(s) || !isFinite(s) || s < 0) return '0:00';
+        return `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+    }
+
+    const parentFrame = window.parent;
 
     document.addEventListener('DOMContentLoaded', loadDashboard);
 </script>

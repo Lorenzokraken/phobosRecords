@@ -515,17 +515,15 @@ def revenue_by_genre(
 
 @router.get("/api/revenue/mtd")
 def revenue_mtd(db=Depends(get_db)):
-    """Revenue mese corrente vs mese precedente."""
+    """Revenue mese corrente vs mese precedente. purchase_month è TEXT 'YYYY-MM'."""
     logger.info("GET /api/revenue/mtd")
     cur = db.cursor()
     cur.execute("""
         WITH monthly AS (
-            SELECT
-                DATE_TRUNC('month', purchase_month) AS mo,
-                COALESCE(SUM(gross_rev), 0) AS rev
+            SELECT purchase_month AS mo, COALESCE(SUM(gross_rev), 0) AS rev
             FROM aggregated_royalties
-            GROUP BY 1
-            ORDER BY 1 DESC
+            GROUP BY purchase_month
+            ORDER BY purchase_month DESC
             LIMIT 2
         )
         SELECT mo, rev FROM monthly ORDER BY mo DESC
@@ -533,24 +531,29 @@ def revenue_mtd(db=Depends(get_db)):
     rows = cur.fetchall()
     cur.close()
     if not rows:
-        return {"value": 0, "vs_last_month_pct": None}
+        return {"value": 0, "vs_last_month_pct": None, "month": None}
     current = float(rows[0][1])
     previous = float(rows[1][1]) if len(rows) > 1 else None
     pct = round((current - previous) / previous * 100, 1) if previous and previous > 0 else None
-    return {"value": current, "vs_last_month_pct": pct, "month": rows[0][0].strftime("%B %Y") if rows[0][0] else None}
+    # Format 'YYYY-MM' -> 'March 2026'
+    from datetime import datetime as dt
+    try:
+        label = dt.strptime(rows[0][0], "%Y-%m").strftime("%B %Y")
+    except Exception:
+        label = rows[0][0]
+    return {"value": current, "vs_last_month_pct": pct, "month": label}
 
 
 @router.get("/api/top-work")
 def top_work(db=Depends(get_db)):
-    """Opera con la revenue lorda più alta nel mese corrente."""
+    """Opera con la revenue lorda più alta nel mese più recente."""
     logger.info("GET /api/top-work")
     cur = db.cursor()
     cur.execute("""
+        WITH latest AS (SELECT MAX(purchase_month) AS mo FROM aggregated_royalties)
         SELECT work_id, work_title, artist_name, SUM(gross_rev) AS revenue
-        FROM aggregated_royalties
-        WHERE DATE_TRUNC('month', purchase_month) = DATE_TRUNC('month', (
-            SELECT MAX(purchase_month) FROM aggregated_royalties
-        ))
+        FROM aggregated_royalties, latest
+        WHERE purchase_month = latest.mo
         GROUP BY work_id, work_title, artist_name
         ORDER BY revenue DESC
         LIMIT 1
@@ -564,15 +567,14 @@ def top_work(db=Depends(get_db)):
 
 @router.get("/api/top-artist-mtd")
 def top_artist_mtd(db=Depends(get_db)):
-    """Artista con la revenue lorda più alta nel mese corrente."""
+    """Artista con la revenue lorda più alta nel mese più recente."""
     logger.info("GET /api/top-artist-mtd")
     cur = db.cursor()
     cur.execute("""
+        WITH latest AS (SELECT MAX(purchase_month) AS mo FROM aggregated_royalties)
         SELECT artist_id, artist_name, main_genre, SUM(gross_rev) AS revenue
-        FROM aggregated_royalties
-        WHERE DATE_TRUNC('month', purchase_month) = DATE_TRUNC('month', (
-            SELECT MAX(purchase_month) FROM aggregated_royalties
-        ))
+        FROM aggregated_royalties, latest
+        WHERE purchase_month = latest.mo
         GROUP BY artist_id, artist_name, main_genre
         ORDER BY revenue DESC
         LIMIT 1
@@ -586,22 +588,30 @@ def top_artist_mtd(db=Depends(get_db)):
 
 @router.get("/api/revenue/trend6m")
 def revenue_trend6m(db=Depends(get_db)):
-    """Revenue ultimi 6 mesi."""
+    """Revenue ultimi 6 mesi. purchase_month è TEXT 'YYYY-MM'."""
     logger.info("GET /api/revenue/trend6m")
     cur = db.cursor()
     cur.execute("""
-        SELECT purchase_month, COALESCE(SUM(gross_rev), 0) AS revenue
-        FROM aggregated_royalties
-        WHERE purchase_month >= (
-            SELECT DATE_TRUNC('month', MAX(purchase_month)) - INTERVAL '5 months'
-            FROM aggregated_royalties
+        WITH latest AS (SELECT MAX(purchase_month) AS mo FROM aggregated_royalties),
+        cutoff AS (
+            SELECT to_char(
+                (to_date(mo, 'YYYY-MM') - INTERVAL '5 months'),
+                'YYYY-MM'
+            ) AS mo FROM latest
         )
+        SELECT purchase_month, COALESCE(SUM(gross_rev), 0) AS revenue
+        FROM aggregated_royalties, cutoff
+        WHERE purchase_month >= cutoff.mo
         GROUP BY purchase_month
         ORDER BY purchase_month
     """)
     rows = cur.fetchall()
     cur.close()
-    return {"trend": [{"month": r[0].strftime("%b %Y"), "revenue": float(r[1])} for r in rows]}
+    from datetime import datetime as dt
+    def fmt_month(s):
+        try: return dt.strptime(s, "%Y-%m").strftime("%b %Y")
+        except Exception: return s
+    return {"trend": [{"month": fmt_month(r[0]), "revenue": float(r[1])} for r in rows]}
 
 
 @router.post("/create_work")

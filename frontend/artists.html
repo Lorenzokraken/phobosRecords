@@ -107,71 +107,74 @@
     </main>
     
     <!-- Modal Dialog -->
-    <div id="artistModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="form-title">Add New Artist</h2>
-                <button id="closeModal" class="close-btn">
-                    <i data-lucide="x"></i>
+    <div id="artistModal" class="pm-overlay">
+        <div class="pm-panel">
+            <div class="pm-panel-header">
+                <div>
+                    <div class="pm-panel-title">New Artist</div>
+                    <div class="pm-panel-sub">Add a new artist to the roster</div>
+                </div>
+                <button id="closeModal" class="pm-close" aria-label="Close">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
-            <div class="modal-body">
-                <form id="artistForm">
-                    <div class="form-group">
-                        <label for="artistName">Artist Name *</label>
-                        <input type="text" id="artistName" name="artistName" required>
+            <form id="artistForm" class="pm-form">
+                <!-- Image drop zone -->
+                <div class="pm-dropzone" id="artistDropzone">
+                    <div class="pm-dropzone-inner" id="artistDropzoneInner">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                        <span class="pm-dropzone-label">Drop photo or <label for="artistImage" class="pm-dropzone-link">browse</label></span>
                     </div>
+                    <input type="file" id="artistImage" name="artistImage" accept="image/png,image/jpeg,image/webp" style="display:none">
+                </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="mainGenre">Main Genre *</label>
-                            <input type="text" id="mainGenre" name="mainGenre" placeholder="e.g. Techno" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="workType">Work Type</label>
-                            <select id="workType" name="workType">
-                                <option value="Album">Album</option>
-                                <option value="Single">Single</option>
-                                <option value="EP">EP</option>
-                                <option value="Mixtape">Mixtape</option>
-                            </select>
-                        </div>
-                    </div>
+                <div class="pm-field">
+                    <label class="pm-label" for="artistName">Artist Name <span class="pm-req">*</span></label>
+                    <input class="pm-input" type="text" id="artistName" name="artistName" placeholder="e.g. Lyra Void" required>
+                </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="royaltyPct">Royalty (%) *</label>
-                            <input type="number" id="royaltyPct" name="royaltyPct" min="0" max="100" step="0.01" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="advancedPaid">Advance Paid ($)</label>
-                            <input type="number" id="advancedPaid" name="advancedPaid" min="0" step="0.01">
-                        </div>
-                        <div class="form-group">
-                            <label for="advancePending">Advance Pending ($)</label>
-                            <input type="number" id="advancePending" name="advancePending" min="0" step="0.01">
-                        </div>
+                <div class="pm-row">
+                    <div class="pm-field">
+                        <label class="pm-label" for="mainGenre">Genre <span class="pm-req">*</span></label>
+                        <input class="pm-input" type="text" id="mainGenre" name="mainGenre" placeholder="e.g. Techno" required>
                     </div>
+                    <div class="pm-field">
+                        <label class="pm-label" for="workType">Work Type</label>
+                        <select class="pm-input pm-select" id="workType" name="workType">
+                            <option value="Album">Album</option>
+                            <option value="Single">Single</option>
+                            <option value="EP">EP</option>
+                            <option value="Mixtape">Mixtape</option>
+                        </select>
+                    </div>
+                </div>
 
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="isFrontArtist" name="isFrontArtist">
-                        <label for="isFrontArtist">Front Artist</label>
+                <div class="pm-row">
+                    <div class="pm-field">
+                        <label class="pm-label" for="royaltyPct">Royalty % <span class="pm-req">*</span></label>
+                        <input class="pm-input" type="number" id="royaltyPct" name="royaltyPct" min="0" max="100" step="0.01" placeholder="0.00" required>
                     </div>
+                    <div class="pm-field">
+                        <label class="pm-label" for="advancedPaid">Advance Paid ($)</label>
+                        <input class="pm-input" type="number" id="advancedPaid" name="advancedPaid" min="0" step="0.01" placeholder="0">
+                    </div>
+                    <div class="pm-field">
+                        <label class="pm-label" for="advancePending">Advance Pending ($)</label>
+                        <input class="pm-input" type="number" id="advancePending" name="advancePending" min="0" step="0.01" placeholder="0">
+                    </div>
+                </div>
 
-                    <div class="form-group">
-                        <label for="artistImage">Artist Image</label>
-                        <input type="file" id="artistImage" name="artistImage" accept="image/png,image/jpeg,image/webp">
-                        <div class="image-preview" id="artistImagePreview">
-                            <span class="image-preview-placeholder">No image selected</span>
-                        </div>
-                    </div>
+                <label class="pm-toggle">
+                    <input type="checkbox" id="isFrontArtist" name="isFrontArtist">
+                    <span class="pm-toggle-track"><span class="pm-toggle-thumb"></span></span>
+                    <span class="pm-toggle-label">Front Artist</span>
+                </label>
 
-                    <div class="form-actions">
-                        <button type="submit" class="submit-btn">Add Artist</button>
-                        <button type="button" id="cancelFormBtn" class="reset-btn">Cancel</button>
-                    </div>
-                </form>
-            </div>
+                <div class="pm-actions">
+                    <button type="button" id="cancelFormBtn" class="pm-btn-ghost">Cancel</button>
+                    <button type="submit" class="pm-btn-primary">Add Artist</button>
+                </div>
+            </form>
         </div>
     </div>
     
@@ -194,23 +197,25 @@
             grid.innerHTML = '';
             const start = (currentPage - 1) * PAGE_SIZE;
             const page = artists.slice(start, start + PAGE_SIZE);
-            page.forEach((artist) => {
+            page.forEach((artist, pageIdx) => {
                 const clone = template.content.cloneNode(true);
-                const img = clone.querySelector('img');
                 clone.querySelector('.artist-name').textContent = artist.artist_name;
                 clone.querySelector('.artist-genre').textContent = artist.main_genre;
                 clone.querySelector('.artist-stats').textContent = `Royalty: ${(artist.royalty_pct * 100).toFixed(1)}%`;
                 clone.querySelector('.artist-description').textContent = artist.work_type;
-                img.onload = () => { img.style.display = 'block'; clone.querySelector('.artist-image').style.backgroundColor = 'transparent'; };
+                grid.appendChild(clone);
+                const card = grid.lastElementChild;
+                const img = card.querySelector('img');
+                const imgWrap = card.querySelector('.artist-image');
+                const localIdx = start + pageIdx + 1;
+                img.onload = () => { img.style.display = 'block'; imgWrap.style.backgroundColor = 'transparent'; };
                 img.onerror = () => {
                     img.style.display = 'none';
-                    const div = clone.querySelector('.artist-image');
-                    div.style.backgroundColor = getRandomColor();
-                    div.style.width = '100px'; div.style.height = '100px'; div.style.borderRadius = '50%';
+                    imgWrap.style.backgroundColor = getRandomColor();
+                    imgWrap.style.width = '100px'; imgWrap.style.height = '100px'; imgWrap.style.borderRadius = '50%';
                 };
-                img.src = artist.artist_image || `/assets/artists/${artist.artist_id}.png`;
+                img.src = `/assets/artists/${localIdx}.png`;
                 img.alt = artist.artist_name;
-                grid.appendChild(clone);
             });
             renderPagination(artists.length);
         }
@@ -291,30 +296,40 @@
         // Load on page load
         document.addEventListener('DOMContentLoaded', loadArtists);
 
-        // Setup modal
-        setupModal('artistModal', 'toggleFormBtn', 'closeModal', 'cancelFormBtn');
+        // Modal open/close
+        const artistModal = document.getElementById('artistModal');
+        const openModal = () => artistModal.classList.add('open');
+        const closeArtistModal = () => artistModal.classList.remove('open');
+        document.getElementById('toggleFormBtn').addEventListener('click', openModal);
+        document.getElementById('closeModal').addEventListener('click', closeArtistModal);
+        document.getElementById('cancelFormBtn').addEventListener('click', closeArtistModal);
+        artistModal.addEventListener('click', e => { if (e.target === artistModal) closeArtistModal(); });
 
-        // Image preview
-        document.getElementById('artistImage').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            const preview = document.getElementById('artistImagePreview');
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = ev => {
-                    preview.innerHTML = `<img src="${ev.target.result}" style="border-radius:50%;width:100px;height:100px;object-fit:cover;">`;
-                };
-                reader.readAsDataURL(file);
-            } else {
-                preview.innerHTML = '<span class="image-preview-placeholder">No image selected</span>';
-            }
+        // Image preview via dropzone
+        const artistDropzone = document.getElementById('artistDropzone');
+        const artistDropzoneInner = document.getElementById('artistDropzoneInner');
+        const artistImageInput = document.getElementById('artistImage');
+        artistDropzone.addEventListener('click', () => artistImageInput.click());
+        artistImageInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = ev => {
+                artistDropzoneInner.innerHTML = `<img src="${ev.target.result}" style="width:100%;max-height:180px;object-fit:cover;border-radius:10px;display:block;">`;
+                artistDropzoneInner.classList.add('has-preview');
+            };
+            reader.readAsDataURL(file);
         });
 
-        // Form submission handling
+        // Form submission
         document.getElementById('artistForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            const submitBtn = this.querySelector('.pm-btn-primary');
+            submitBtn.textContent = 'Saving...';
+            submitBtn.disabled = true;
 
             let imageName = '';
-            const imageFile = document.getElementById('artistImage').files[0];
+            const imageFile = artistImageInput.files[0];
             if (imageFile) {
                 const fd = new FormData();
                 fd.append('file', imageFile);
@@ -340,17 +355,18 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formData)
                 });
-
                 if (response.ok) {
-                    alert(`Artist "${formData.artist_name}" added successfully!`);
-                    this.reset();
-                    document.getElementById('artistImagePreview').innerHTML = '<span class="image-preview-placeholder">No image selected</span>';
-                    document.getElementById('artistModal').style.display = 'none';
-                    setTimeout(() => location.reload(), 500);
+                    closeArtistModal();
+                    sessionStorage.removeItem('phobos_artists');
+                    setTimeout(() => location.reload(), 200);
                 } else {
+                    submitBtn.textContent = 'Add Artist';
+                    submitBtn.disabled = false;
                     alert('Error adding artist');
                 }
             } catch (error) {
+                submitBtn.textContent = 'Add Artist';
+                submitBtn.disabled = false;
                 alert('Error: ' + error.message);
             }
         });

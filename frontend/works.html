@@ -125,73 +125,76 @@
     </main>
     
     <!-- Modal Dialog for Adding Works -->
-    <div id="workModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="form-title">Add New Work</h2>
-                <button id="closeWorkModal" class="close-btn">
-                    <i data-lucide="x"></i>
+    <div id="workModal" class="pm-overlay">
+        <div class="pm-panel">
+            <div class="pm-panel-header">
+                <div>
+                    <div class="pm-panel-title">New Work</div>
+                    <div class="pm-panel-sub">Register a new release to the catalog</div>
+                </div>
+                <button id="closeWorkModal" class="pm-close" aria-label="Close">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
-            <div class="modal-body">
-                <form id="workForm">
-                    <div class="form-group">
-                        <label for="artistSelect">Artist *</label>
-                        <select id="artistSelect" name="artistSelect" required>
-                            <option value="">Select an artist...</option>
+            <form id="workForm" class="pm-form">
+                <!-- Cover drop zone -->
+                <div class="pm-dropzone" id="workDropzone">
+                    <div class="pm-dropzone-inner" id="workDropzoneInner">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                        <span class="pm-dropzone-label">Drop cover or <label for="workCover" class="pm-dropzone-link">browse</label></span>
+                    </div>
+                    <input type="file" id="workCover" name="workCover" accept="image/png,image/jpeg,image/webp" style="display:none">
+                </div>
+
+                <div class="pm-row">
+                    <div class="pm-field" style="flex:1.5">
+                        <label class="pm-label" for="workTitle">Title <span class="pm-req">*</span></label>
+                        <input class="pm-input" type="text" id="workTitle" name="workTitle" placeholder="e.g. Event Horizon" required>
+                    </div>
+                    <div class="pm-field" style="flex:1">
+                        <label class="pm-label" for="artistSelect">Artist <span class="pm-req">*</span></label>
+                        <select class="pm-input pm-select" id="artistSelect" name="artistSelect" required>
+                            <option value="">Select...</option>
                         </select>
                     </div>
+                </div>
 
-                    <div class="form-group">
-                        <label for="workTitle">Work Title *</label>
-                        <input type="text" id="workTitle" name="workTitle" required>
+                <div class="pm-row">
+                    <div class="pm-field">
+                        <label class="pm-label" for="genre">Genre(s)</label>
+                        <input class="pm-input" type="text" id="genre" name="genre" placeholder="e.g. Techno, House">
                     </div>
+                    <div class="pm-field">
+                        <label class="pm-label" for="releaseDate">Release Date</label>
+                        <input class="pm-input pm-date" type="date" id="releaseDate" name="releaseDate">
+                    </div>
+                </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="genre">Genre(s)</label>
-                            <input type="text" id="genre" name="genre" placeholder="e.g. Techno, House">
-                        </div>
-                        <div class="form-group">
-                            <label for="releaseDate">Release Date</label>
-                            <input type="date" id="releaseDate" name="releaseDate">
-                        </div>
+                <div class="pm-row">
+                    <div class="pm-field">
+                        <label class="pm-label" for="duration">Duration (s)</label>
+                        <input class="pm-input" type="number" id="duration" name="duration" min="0" placeholder="240">
                     </div>
+                    <div class="pm-field">
+                        <label class="pm-label" for="bpm">BPM</label>
+                        <input class="pm-input" type="number" id="bpm" name="bpm" min="0" placeholder="128">
+                    </div>
+                    <div class="pm-field">
+                        <label class="pm-label" for="musicalKey">Key</label>
+                        <input class="pm-input" type="text" id="musicalKey" name="musicalKey" placeholder="e.g. Am">
+                    </div>
+                </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="duration">Duration (s)</label>
-                            <input type="number" id="duration" name="duration" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label for="bpm">BPM</label>
-                            <input type="number" id="bpm" name="bpm" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label for="musicalKey">Key</label>
-                            <input type="text" id="musicalKey" name="musicalKey" placeholder="e.g. Am">
-                        </div>
-                    </div>
+                <div class="pm-field">
+                    <label class="pm-label" for="iswc">ISWC</label>
+                    <input class="pm-input" type="text" id="iswc" name="iswc" placeholder="T-000.000.000-0">
+                </div>
 
-                    <div class="form-group">
-                        <label for="iswc">ISWC</label>
-                        <input type="text" id="iswc" name="iswc" placeholder="T-000.000.000-0">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="workCover">Cover Art</label>
-                        <input type="file" id="workCover" name="workCover" accept="image/png,image/jpeg,image/webp">
-                        <div class="image-preview" id="workCoverPreview">
-                            <span class="image-preview-placeholder">No image selected</span>
-                        </div>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="submit" class="submit-btn">Add Work</button>
-                        <button type="button" id="cancelWorkFormBtn" class="reset-btn">Cancel</button>
-                    </div>
-                </form>
-            </div>
+                <div class="pm-actions">
+                    <button type="button" id="cancelWorkFormBtn" class="pm-btn-ghost">Cancel</button>
+                    <button type="submit" class="pm-btn-primary">Add Work</button>
+                </div>
+            </form>
         </div>
     </div>
     
@@ -211,7 +214,6 @@
             list.innerHTML = '';
             works.forEach((work, index) => {
                 const clone = template.content.cloneNode(true);
-                const img = clone.querySelector('img');
                 clone.querySelector('.work-title').textContent = work.title;
                 clone.querySelector('.song-number').textContent = String(index + 1).padStart(2, '0');
                 clone.querySelector('.song-artist').textContent = work.artist_name || 'Unknown';
@@ -219,17 +221,18 @@
                     `${(work.genre || ['Unknown'])[0]} • ${work.duration || 0}s • ${work.bpm || 0} BPM`;
                 clone.querySelector('.streams').textContent = `${work.bpm || 0} BPM`;
                 clone.querySelector('.likes').textContent = `Key: ${work.key || 'N/A'}`;
-                const imageId = index + 1;
-                img.onload = () => { img.style.display = 'block'; clone.querySelector('.cover-art').style.backgroundColor = 'transparent'; };
+                list.appendChild(clone);
+                const item = list.lastElementChild;
+                const img = item.querySelector('img');
+                const coverDiv = item.querySelector('.cover-art');
+                img.onload = () => { img.style.display = 'block'; coverDiv.style.backgroundColor = 'transparent'; };
                 img.onerror = () => {
                     img.style.display = 'none';
-                    const div = clone.querySelector('.cover-art');
-                    div.style.backgroundColor = getRandomColor();
-                    div.style.width = '56px'; div.style.height = '56px';
+                    coverDiv.style.backgroundColor = getRandomColor();
+                    coverDiv.style.width = '56px'; coverDiv.style.height = '56px';
                 };
-                img.src = `/assets/albums/${imageId}.png`;
+                img.src = `/assets/albums/${index + 1}.png`;
                 img.alt = work.title;
-                list.appendChild(clone);
             });
         }
 
@@ -295,30 +298,40 @@
             loadArtistSelect();
         });
 
-        // Setup modal
-        setupModal('workModal', 'toggleWorkFormBtn', 'closeWorkModal', 'cancelWorkFormBtn');
+        // Modal open/close
+        const workModal = document.getElementById('workModal');
+        const openWorkModal = () => workModal.classList.add('open');
+        const closeWorkModal = () => workModal.classList.remove('open');
+        document.getElementById('toggleWorkFormBtn').addEventListener('click', openWorkModal);
+        document.getElementById('closeWorkModal').addEventListener('click', closeWorkModal);
+        document.getElementById('cancelWorkFormBtn').addEventListener('click', closeWorkModal);
+        workModal.addEventListener('click', e => { if (e.target === workModal) closeWorkModal(); });
 
-        // Cover art preview
-        document.getElementById('workCover').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            const preview = document.getElementById('workCoverPreview');
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = ev => {
-                    preview.innerHTML = `<img src="${ev.target.result}" style="border-radius:4px;width:100px;height:100px;object-fit:cover;">`;
-                };
-                reader.readAsDataURL(file);
-            } else {
-                preview.innerHTML = '<span class="image-preview-placeholder">No image selected</span>';
-            }
+        // Cover preview via dropzone
+        const workDropzone = document.getElementById('workDropzone');
+        const workDropzoneInner = document.getElementById('workDropzoneInner');
+        const workCoverInput = document.getElementById('workCover');
+        workDropzone.addEventListener('click', () => workCoverInput.click());
+        workCoverInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = ev => {
+                workDropzoneInner.innerHTML = `<img src="${ev.target.result}" style="width:100%;max-height:180px;object-fit:cover;border-radius:10px;display:block;">`;
+                workDropzoneInner.classList.add('has-preview');
+            };
+            reader.readAsDataURL(file);
         });
 
-        // Form submission handling
+        // Form submission
         document.getElementById('workForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            const submitBtn = this.querySelector('.pm-btn-primary');
+            submitBtn.textContent = 'Saving...';
+            submitBtn.disabled = true;
 
             let coverName = '';
-            const coverFile = document.getElementById('workCover').files[0];
+            const coverFile = workCoverInput.files[0];
             if (coverFile) {
                 const fd = new FormData();
                 fd.append('file', coverFile);
@@ -348,18 +361,18 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(workData)
                 });
-
                 if (response.ok) {
-                    const selectedArtist = document.querySelector(`#artistSelect option[value="${workData.artist_id}"]`).text;
-                    alert(`Work "${workData.title}" added for ${selectedArtist} successfully!`);
-                    this.reset();
-                    document.getElementById('workCoverPreview').innerHTML = '<span class="image-preview-placeholder">No image selected</span>';
-                    document.getElementById('workModal').style.display = 'none';
-                    setTimeout(() => location.reload(), 500);
+                    closeWorkModal();
+                    sessionStorage.removeItem('phobos_works');
+                    setTimeout(() => location.reload(), 200);
                 } else {
+                    submitBtn.textContent = 'Add Work';
+                    submitBtn.disabled = false;
                     alert('Error adding work');
                 }
             } catch (error) {
+                submitBtn.textContent = 'Add Work';
+                submitBtn.disabled = false;
                 alert('Error: ' + error.message);
             }
         });

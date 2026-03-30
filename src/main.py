@@ -241,6 +241,10 @@ def page_works():
 def page_analytics():
     return FileResponse("frontend/analytics.html")
 
+@app.get("/favicon.ico")
+def favicon():
+    return FileResponse("frontend/favicon.ico")
+
 @app.get("/assets/audio/{filename}")
 def get_audio(filename: str):
     audio_path = Path(__file__).parent.parent / "frontend" / "src" / "audio" / filename

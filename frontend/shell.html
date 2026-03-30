@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Phobos Records</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="/assets/shared.css">
     <style>
         html, body { height: 100%; overflow: hidden; }
@@ -249,6 +250,12 @@
         const audio = new Audio();
         audio.src = tracks[0].src;
 
+        // Expose to iframe
+        window.pbIsPlaying = false;
+        window.pbTogglePlayFromIframe = pbTogglePlay;
+        window.pbSeek = pbSeek;
+        window.pbChangeTrack = pbChangeTrack;
+
         function formatTime(s) {
             if (!s || isNaN(s) || !isFinite(s) || s < 0) return '0:00';
             return `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
@@ -278,12 +285,31 @@
                 document.getElementById('pbPlayIcon').style.display = 'none';
                 document.getElementById('pbPauseIcon').style.display = '';
             }
+            window.pbIsPlaying = isPlaying;
+            updateIframePlayState();
+        }
+
+        function updateIframePlayState() {
+            const frame = document.getElementById('pageFrame');
+            if (frame && frame.contentWindow) {
+                frame.contentWindow.pbIsPlaying = isPlaying;
+                frame.contentWindow.updateTrackList?.();
+            }
         }
 
         function pbChangeTrack(dir) {
             currentTrack = (currentTrack + dir + tracks.length) % tracks.length;
             pbLoadTrack(currentTrack);
             if (isPlaying) audio.play();
+            updateIframeTrack();
+        }
+
+        function updateIframeTrack() {
+            const frame = document.getElementById('pageFrame');
+            if (frame && frame.contentWindow && frame.contentWindow.loadTrack) {
+                frame.contentWindow.currentTrack = currentTrack;
+                frame.contentWindow.loadTrack(currentTrack);
+            }
         }
 
         function pbSeek(val) {
