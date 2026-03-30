@@ -223,7 +223,7 @@
                     div.style.backgroundColor = getRandomColor();
                     div.style.width = '100px'; div.style.height = '100px'; div.style.borderRadius = '50%';
                 };
-                img.src = `/assets/artists/${artist.artist_id}.png`;
+                img.src = artist.artist_image || `/assets/artists/${artist.artist_id}.png`;
                 img.alt = artist.artist_name;
                 grid.appendChild(clone);
             });
@@ -293,7 +293,8 @@
                     select.appendChild(opt);
                 });
 
-                renderArtists(allArtists);
+                filteredArtists = allArtists;
+                renderArtists(filteredArtists);
 
                 document.getElementById('artistSearch').addEventListener('input', applyFilters);
                 document.getElementById('genreFilter').addEventListener('change', applyFilters);
