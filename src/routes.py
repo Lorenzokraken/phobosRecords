@@ -513,6 +513,97 @@ def revenue_by_genre(
     return {"genres": [{"genre": r[0], "units_sold": int(r[1]), "gross_revenue": float(r[2])} for r in rows]}
 
 
+@router.get("/api/revenue/mtd")
+def revenue_mtd(db=Depends(get_db)):
+    """Revenue mese corrente vs mese precedente."""
+    logger.info("GET /api/revenue/mtd")
+    cur = db.cursor()
+    cur.execute("""
+        WITH monthly AS (
+            SELECT
+                DATE_TRUNC('month', purchase_month) AS mo,
+                COALESCE(SUM(gross_rev), 0) AS rev
+            FROM aggregated_royalties
+            GROUP BY 1
+            ORDER BY 1 DESC
+            LIMIT 2
+        )
+        SELECT mo, rev FROM monthly ORDER BY mo DESC
+    """)
+    rows = cur.fetchall()
+    cur.close()
+    if not rows:
+        return {"value": 0, "vs_last_month_pct": None}
+    current = float(rows[0][1])
+    previous = float(rows[1][1]) if len(rows) > 1 else None
+    pct = round((current - previous) / previous * 100, 1) if previous and previous > 0 else None
+    return {"value": current, "vs_last_month_pct": pct, "month": rows[0][0].strftime("%B %Y") if rows[0][0] else None}
+
+
+@router.get("/api/top-work")
+def top_work(db=Depends(get_db)):
+    """Opera con la revenue lorda più alta nel mese corrente."""
+    logger.info("GET /api/top-work")
+    cur = db.cursor()
+    cur.execute("""
+        SELECT work_id, work_title, artist_name, SUM(gross_rev) AS revenue
+        FROM aggregated_royalties
+        WHERE DATE_TRUNC('month', purchase_month) = DATE_TRUNC('month', (
+            SELECT MAX(purchase_month) FROM aggregated_royalties
+        ))
+        GROUP BY work_id, work_title, artist_name
+        ORDER BY revenue DESC
+        LIMIT 1
+    """)
+    row = cur.fetchone()
+    cur.close()
+    if not row:
+        raise HTTPException(status_code=404, detail="No works found")
+    return {"work_id": row[0], "title": row[1], "artist": row[2], "revenue": float(row[3])}
+
+
+@router.get("/api/top-artist-mtd")
+def top_artist_mtd(db=Depends(get_db)):
+    """Artista con la revenue lorda più alta nel mese corrente."""
+    logger.info("GET /api/top-artist-mtd")
+    cur = db.cursor()
+    cur.execute("""
+        SELECT artist_id, artist_name, main_genre, SUM(gross_rev) AS revenue
+        FROM aggregated_royalties
+        WHERE DATE_TRUNC('month', purchase_month) = DATE_TRUNC('month', (
+            SELECT MAX(purchase_month) FROM aggregated_royalties
+        ))
+        GROUP BY artist_id, artist_name, main_genre
+        ORDER BY revenue DESC
+        LIMIT 1
+    """)
+    row = cur.fetchone()
+    cur.close()
+    if not row:
+        raise HTTPException(status_code=404, detail="No artists found")
+    return {"artist_id": row[0], "name": row[1], "genre": row[2], "revenue": float(row[3])}
+
+
+@router.get("/api/revenue/trend6m")
+def revenue_trend6m(db=Depends(get_db)):
+    """Revenue ultimi 6 mesi."""
+    logger.info("GET /api/revenue/trend6m")
+    cur = db.cursor()
+    cur.execute("""
+        SELECT purchase_month, COALESCE(SUM(gross_rev), 0) AS revenue
+        FROM aggregated_royalties
+        WHERE purchase_month >= (
+            SELECT DATE_TRUNC('month', MAX(purchase_month)) - INTERVAL '5 months'
+            FROM aggregated_royalties
+        )
+        GROUP BY purchase_month
+        ORDER BY purchase_month
+    """)
+    rows = cur.fetchall()
+    cur.close()
+    return {"trend": [{"month": r[0].strftime("%b %Y"), "revenue": float(r[1])} for r in rows]}
+
+
 @router.post("/create_work")
 def create_work(work: WorkCreate, db=Depends(get_db)):
     """Crea una nuova opera nel database."""
